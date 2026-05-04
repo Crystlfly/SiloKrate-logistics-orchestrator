@@ -1,14 +1,18 @@
 import { Router } from "express";
 import sql from "mssql";
 import dbconfigSetup from "../dbconfigSetup.js";
-import {authenticateToken} from '../middleware/auth.js';
+import { establishConnection } from '../utils/dbhelper.js'; // Ensure this is imported!
+import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 const config = dbconfigSetup;
 
-router.get("/api/logistics", authenticateToken, async (req, res) => {
+router.get("/api/logistics", 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "logistics_manager"]), 
+    async (req, res) => {
   try {
-    const pool = await sql.connect(config);
+    const pool = await establishConnection(config);
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const offset = (page - 1) * limit;
@@ -42,10 +46,24 @@ router.get("/api/logistics", authenticateToken, async (req, res) => {
     
     const totalItems = countQuery.recordset[0].total;
     const totalPages = Math.ceil(totalItems / limit);
-    res.json({ status: 200, data: result.recordset, totalItems, totalPages });
+    
+    res.status(200).json({ 
+        status: 200, 
+        data: result.recordset, 
+        pagination: {
+            currentPage: page,
+            totalPages: totalPages,
+            totalItems: totalItems,
+            itemsPerPage: limit
+        }
+    });
+
   } catch (err) {
     console.error("Logistics Fetch Error:", err.message);
-    res.json({ status: 500, message: "Internal server error: " + err.message });
+    res.status(500).json({ 
+        status: 500, 
+        message: "Internal server error: " + err.message 
+    });
   }
 });
 

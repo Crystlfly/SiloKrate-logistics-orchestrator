@@ -80,12 +80,17 @@ export default function FleetModal({isOpen, onCloseAction, initialToBeUpdatedDat
                 body: JSON.stringify(payload) // <--- Send 'payload', NOT 'formData'
             });
 
-            if (response.status === 401 || response.status === 403) {
+            if (response.status === 401) {
                 alert("Your session has expired. Please log in again.");
                 localStorage.removeItem('nexus_user_role');
                 localStorage.removeItem('nexus_expires_at');
                 window.location.href = '/login';
                 return; 
+            }
+
+            else if (response.status === 403) {
+                window.location.href = '/unauthorized';
+                return;
             }
     
             if (response.ok) {

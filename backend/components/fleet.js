@@ -2,12 +2,15 @@ import {Router} from 'express';
 import sql from 'mssql';
 import dbconfigSetup from '../dbconfigSetup.js';
 import {addFleet, updateFleet, deleteFleet} from '../services/vehicleService.js';
-import {authenticateToken} from '../middleware/auth.js';
+import {authenticateToken, requireRole} from '../middleware/auth.js';
 
 const config = dbconfigSetup;
 const router = Router();
 
-router.get('/api/fleet', authenticateToken, async (req, res) => {
+router.get('/api/fleet', 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "logistics_manager"]), 
+    async (req, res) => {
     try{
         const pool= await sql.connect(config);
 
@@ -104,11 +107,14 @@ router.get('/api/fleet', authenticateToken, async (req, res) => {
     }
     catch(err){
         console.error("Fleet Fetch Error:", err.message);
-        res.json({status:500, message:"Internal server error: " + err.message});
+        res.status(500).json({status:500, message:"Internal server error: " + err.message});
     }
 });
 
-router.post('/api/addFleet', authenticateToken, async (req, res) => {
+router.post('/api/addFleet', 
+    authenticateToken, 
+    requireRole(["system_admin", "logistics_manager"]), 
+    async (req, res) => {
     try{
         const fleetData=req.body;
         const result = await addFleet(fleetData, req.user?.name);
@@ -133,7 +139,10 @@ router.post('/api/addFleet', authenticateToken, async (req, res) => {
     }
 });
 
-router.put('/api/updateFleet/:id', authenticateToken, async (req, res) => {
+router.put('/api/updateFleet/:id', 
+    authenticateToken, 
+    requireRole(["system_admin", "logistics_manager"]), 
+    async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id, 10);
         const fleetData = req.body;
@@ -145,7 +154,10 @@ router.put('/api/updateFleet/:id', authenticateToken, async (req, res) => {
     }
 });
 
-router.delete('/api/deleteFleet/:id', authenticateToken, async (req, res) => {
+router.delete('/api/deleteFleet/:id', 
+    authenticateToken, 
+    requireRole(["system_admin", "logistics_manager"]), 
+    async (req, res) => {
     try {
         const vehicleId = parseInt(req.params.id, 10);
         await deleteFleet(vehicleId);

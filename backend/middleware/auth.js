@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 
 export const authenticateToken = (req, res, next) => {
-    // Get token from header (Format: "Bearer TOKEN_STRING")
     const token = req.cookies.nexus_token;
 
     if (!token) {
@@ -10,11 +9,29 @@ export const authenticateToken = (req, res, next) => {
 
     jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
         if (err) {
-            return res.status(403).json({ message: "Invalid or Expired Token" });
+            return res.status(401).json({ message: "Invalid or Expired Token" });
         }
-
-        // Add the decoded user data (username, etc.) to the request object
         req.user = user;
         next(); 
     });
+};
+
+export const requireRole = (allowedRoles) => {
+    return (req, res, next) => {
+        if (!req.user || !req.user.role) {
+            return res.status(403).json({ 
+                status: 403,
+                message: "Access Denied: Role not found in token." 
+            });
+        }
+
+        if (!allowedRoles.includes(req.user.role)) {
+            return res.status(403).json({ 
+                status: 403,
+                message: `Access Denied ` 
+            });
+        }
+
+        next();
+    };
 };

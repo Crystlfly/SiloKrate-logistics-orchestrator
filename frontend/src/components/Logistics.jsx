@@ -1,15 +1,15 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Package,
   TrendingUp,
   Clock,
   MapPin,
   Search,
-  Filter,
   Loader2,
-  MoreVertical
+  MoreVertical,
+  ChevronLeft,   // ADDED THIS
+  ChevronRight   // ADDED THIS
 } from "lucide-react";
-import { useState, useEffect } from 'react';
 import CustomSelect from './CustomSelect'; 
 
 const Logistics = () => {
@@ -17,14 +17,15 @@ const Logistics = () => {
   const [isLoading, setIsLoading]= useState(true);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(0); 
+  const [pageInput, setPageInput] = useState(1); // ADDED THIS MISSING STATE
+  const [totalPages, setTotalPages] = useState(1); 
   const [searchQueryLogistic, setSearchQueryLogistic] = useState("");
   const [statusFilterLogistic, setStatusFilterLogistic] = useState("All Statuses");
   const [vehicleFilterLogistic, setVehicleFilterLogistic] = useState("");
   const itemsPerPage = 10;
 
   useEffect(()=>{
-    const fetchLogistics=async()=>{
+    const fetchLogistics = async() => {
      try{
         const params = new URLSearchParams({
           page: currentPage,
@@ -33,41 +34,96 @@ const Logistics = () => {
           status: statusFilterLogistic === "All Statuses" ? "" : statusFilterLogistic,
           vehicle: vehicleFilterLogistic
         });
+        
         const response=await fetch(`http://localhost:3000/api/logistics?${params}`,{
           headers: {
             'Content-Type': 'application/json' 
           },
           credentials: 'include',
         })
-        if (response.status === 401 || response.status === 403) {
+        
+        if (response.status === 401) {
           alert("Your session has expired. Please log in again.");
           localStorage.removeItem('nexus_user_role');
           localStorage.removeItem('nexus_expires_at');
           window.location.href = '/login';
           return; 
+        } else if (response.status === 403) {
+          window.location.href = '/unauthorized';
+          return;
         }
+      
        if(!response.ok){
         setLogicticData([]);
        }
-        const data =await response.json();
+       
+        const data = await response.json();
         setLogicticData(data.data || []);
         setTotalPages(data?.totalPages || 0);
-     }catch(err){
+     } catch(err) {
         console.error("Logistics API Error:",err);
         setLogicticData([]);
-     }finally{
+     } finally {
         setIsLoading(false);
      }
     }
+
     const timer = setTimeout(() => {
         fetchLogistics();
     }, 500);
     return () => clearTimeout(timer);
   }, [currentPage, searchQueryLogistic, statusFilterLogistic, vehicleFilterLogistic]);
 
+  // Reset to page 1 when filters change
   useEffect(() => {
       setCurrentPage(1);
   }, [searchQueryLogistic, statusFilterLogistic, vehicleFilterLogistic]);
+
+  // --- REMOVED THE ROGUE fetchInventory useEffect HERE ---
+
+  // Pagination Handlers
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(prev => prev - 1);
+  };
+
+  useEffect(() => {
+    setPageInput(currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      let value = parseInt(pageInput);
+  
+      if (isNaN(value)) return;
+      if (value < 1) value = 1;
+      const maxPage = totalPages > 0 ? totalPages : 1;
+      if (value > maxPage) value = maxPage;
+  
+      if (value !== currentPage) {
+        setCurrentPage(value);
+      }
+    }, 800); 
+  
+    return () => clearTimeout(timer);
+  }, [pageInput, totalPages, currentPage]);
+  
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      let value = parseInt(pageInput);
+  
+      if (!value || isNaN(value)) value = 1;
+      if (value < 1) value = 1;
+      
+      const maxPage = totalPages > 0 ? totalPages : 1;
+      if (value > maxPage) value = maxPage;
+  
+      setCurrentPage(value);
+    }
+  };
 
   const activeCount = logisticData.length; 
   const transitCount = logisticData.length; 
@@ -84,9 +140,6 @@ const Logistics = () => {
           <p className="text-sm text-zinc-500 mt-1">Track and manage shipments in real-time</p>
         </div>
         <div className="flex gap-3">
-          {/* <button className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2 rounded-lg text-sm font-bold transition-all">
-            <Filter size={16} /> Filter
-          </button> */}
           <button className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-lg text-sm font-bold transition-all">
             <Package size={16} /> New Shipment
           </button>
@@ -185,28 +238,37 @@ const Logistics = () => {
           })}
         </div>
       </div>
+      
       {/* Pagination Footer */}
-      <div className="flex justify-between items-center mt-6 px-2">
-        <p className="text-xs text-zinc-500">
-          Showing page <span className="text-white font-bold">{currentPage}</span> of <span className="text-white font-bold">{totalPages}</span>
-        </p>
-        <div className="flex gap-2">
+      <div className="p-4 border-t border-zinc-800 flex justify-between items-center bg-white/[0.02]">
           <button 
-            disabled={currentPage === 1}
-            onClick={() => setCurrentPage(prev => prev - 1)}
-            className="px-3 py-1 bg-zinc-800 text-xs text-zinc-300 rounded hover:bg-zinc-700 disabled:opacity-50 transition-all"
+            onClick={handlePrevPage}
+            disabled={currentPage === 1 || isLoading}
+            className="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
-            Previous
+            <ChevronLeft size={14} /> Previous
           </button>
+
+          <span className="text-xs text-zinc-500 font-medium flex items-center gap-2">
+            Page
+            <input
+              type="text"
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-12 text-center bg-[#0F1219] border border-zinc-800 rounded px-2 py-1 text-white focus:border-emerald-500/50 outline-none"
+            />
+              of {totalPages || 1}
+          </span> 
+
           <button 
-            disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage(prev => prev + 1)}
-            className="px-3 py-1 bg-zinc-800 text-xs text-zinc-300 rounded hover:bg-zinc-700 disabled:opacity-50 transition-all"
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages || isLoading}
+            className="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
-            Next
+            Next <ChevronRight size={14} />
           </button>
         </div>
-      </div>
     </div>
   );
 };

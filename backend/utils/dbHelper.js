@@ -6,6 +6,7 @@ export async function establishConnection(config, retries=Max_retries){
         return pool;
     }catch(err){
         if(retries<=0){
+            console.error("Database connection failed after multiple attempts:", err);
             throw new Error("Database connection failed");
         }
         await new Promise(res=>setTimeout(res, 2000));

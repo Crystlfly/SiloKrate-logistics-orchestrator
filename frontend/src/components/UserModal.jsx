@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { X, User, Mail, Shield, AlertCircle, Loader2, CheckCircle2 } from 'lucide-react';
+import CustomSelect from './CustomSelect';
 
 export default function UserModal({ isOpen, onCloseAction, initialData = null }) {
     const [status, setStatus] = useState('idle'); // 'idle' | 'loading' | 'success' | 'error'
@@ -54,12 +55,17 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
                 credentials: 'include',
                 body: JSON.stringify(payload)
             });
-            if (response.status === 401 || response.status === 403) {
+            if (response.status === 401) {
                 alert("Your session has expired. Please log in again.");
                 localStorage.removeItem('nexus_user_role');
                 localStorage.removeItem('nexus_expires_at');
                 window.location.href = '/login';
                 return; 
+            }
+
+            else if (response.status === 403) {
+                window.location.href = '/unauthorized';
+                return;
             }
 
             if (response.ok) {
@@ -84,7 +90,7 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
 
     return (
         <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] p-4">
-            <div className="bg-[#0F1219] border border-zinc-800 rounded-xl w-full max-w-md overflow-hidden shadow-2xl animate-in fade-in zoom-in duration-200">
+            <div className="bg-[#0F1219] border border-zinc-800 rounded-xl w-full max-w-md shadow-2xl animate-in fade-in zoom-in duration-200">
                 
                 {/* Header */}
                 <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-[#161A22]">
@@ -155,18 +161,45 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
                                 <label className="flex items-center gap-2 text-[10px] font-bold text-zinc-500 uppercase mb-1.5">
                                     <Shield size={12} className="text-emerald-500" /> Security Clearance (Role)
                                 </label>
-                                <select 
-                                    name="role" 
-                                    value={formData.role}
-                                    onChange={handleChange}
-                                    className="w-full bg-[#07090D] border border-zinc-800 rounded-lg py-2 px-3 text-sm text-zinc-200 focus:border-emerald-500/50 outline-none appearance-none cursor-pointer"
-                                >
-                                    <option value="" disabled>Select Role</option>
-                                    <option value="system_admin">System Admin</option>
-                                    <option value="inventory_manager">Inventory Manager</option>
-                                    <option value="logistics_manager">Logistics Manager</option>
-                                    <option value="warehouse_staff">Warehouse Staff</option>
-                                </select>
+                                
+                                <CustomSelect
+                                    // 1. Convert the backend value back to a pretty label for the UI
+                                    value={
+                                        formData.role === 'system_admin' ? 'System Admin' :
+                                        formData.role === 'inventory_manager' ? 'Inventory Manager' :
+                                        formData.role === 'inventory_staff' ? 'Inventory Staff' :
+                                        formData.role === 'logistics_manager' ? 'Logistics Manager' :
+                                        formData.role === 'warehouse_manager' ? 'Warehouse Manager' :
+                                        formData.role === 'warehouse_staff' ? 'Warehouse Staff' :
+                                        'Select Role'
+                                    }
+                                    // 2. Map the selected pretty string back to the exact database string
+                                    onChange={(selectedValue) => {
+                                        const roleMap = {
+                                            'System Admin': 'system_admin',
+                                            'Inventory Manager': 'inventory_manager',
+                                            'Inventory Staff': 'inventory_staff',
+                                            'Logistics Manager': 'logistics_manager',
+                                            'Warehouse Manager': 'warehouse_manager',
+                                            'Warehouse Staff': 'warehouse_staff'
+                                        };
+                                        
+                                        // Update formData directly since CustomSelect doesn't send an 'e.target'
+                                        setFormData({ 
+                                            ...formData, 
+                                            role: roleMap[selectedValue] || '' 
+                                        });
+                                    }}
+                                    // 3. Pass simple strings exactly how CustomSelect expects them
+                                    options={[
+                                        'System Admin', 
+                                        'Inventory Manager', 
+                                        'Inventory Staff',
+                                        'Logistics Manager', 
+                                        'Warehouse Manager',
+                                        'Warehouse Staff'
+                                    ]}
+                                />
                             </div>
 
                             {/* Footer Buttons */}

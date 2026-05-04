@@ -2,14 +2,17 @@ import { Router } from 'express';
 import sql from 'mssql';
 import { establishConnection } from '../utils/dbhelper.js';
 import dbconfigSetup from '../dbconfigSetup.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = Router();
 const config = dbconfigSetup;
 
 // Added authenticateToken to protect the route!
 // Note: If you mount this in server.js using app.use('/api', router), change this string to just '/dashboard-stats'
-router.get('/api/dashboard-stats', authenticateToken, async (req, res) => {
+router.get('/api/dashboard-stats', 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "logistics_manager", "inventory_manager"]), 
+    async (req, res) => {
     try {
         const pool = await establishConnection(config);
         

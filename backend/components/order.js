@@ -2,13 +2,16 @@ import {Router} from 'express';
 import sql from 'mssql';
 import { createOrder } from '../services/orderService.js';
 import { updateOrderStatus } from '../services/orderService.js';
-import {authenticateToken} from '../middleware/auth.js';
+import {authenticateToken, requireRole} from '../middleware/auth.js';
 import dbconfigSetup from '../dbconfigSetup.js';
 
 const config = dbconfigSetup;
 const router = Router();
 
-router.get('/api/orders', authenticateToken, async (req, res) => {
+router.get('/api/orders', 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "logistics_manager", "inventory_manager", "warehouse_staff", "inventory_staff"]), 
+    async (req, res) => {
     try {
         const pool = await sql.connect(config);
         const page= parseInt(req.query.page) || 1;
@@ -73,7 +76,10 @@ router.get('/api/orders', authenticateToken, async (req, res) => {
     }
 });
 
-router.post('/api/orders', authenticateToken, async (req, res) => {
+router.post('/api/orders', 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager"]), 
+    async (req, res) => {
     // console.log('User object from middleware:', req.user);
     const username = req.user.name;
     const orderData=req.body;
@@ -94,7 +100,10 @@ router.post('/api/orders', authenticateToken, async (req, res) => {
     }
 });
 
-router.patch('/api/orders/:id/status', authenticateToken, async (req, res) => {
+router.patch('/api/orders/:id/status', 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "logistics_manager", "warehouse_staff"]), 
+    async (req, res) => {
     const orderId = parseInt(req.params.id);
     const { newStatus } = req.body;
 

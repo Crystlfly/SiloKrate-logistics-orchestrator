@@ -49,9 +49,13 @@ const ActivityFeed = () => {
                 const response = await fetch('http://localhost:3000/api/activities', {
                     credentials: 'include'
                 });
-                if (response.status === 401 || response.status === 403) {
+                if (response.status === 401) {
                     // Optional: handle auth errors quietly here or let the main page handle it
                     return; 
+                }
+                else if (response.status === 403) {
+                    window.location.href = '/unauthorized';
+                    return;
                 }
                 if (response.ok) {
                     const json = await response.json();

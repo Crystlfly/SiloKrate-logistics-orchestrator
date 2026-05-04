@@ -10,10 +10,12 @@ import User from './components/User.jsx';
 import Signup from './components/Signup.jsx';
 import Login from './components/Login.jsx';
 import NexusSplash from './components/NexusSplash.jsx';
+import Unauthorized from './components/Unauthorized.jsx';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'; 
 import ResetPasswordPage from './components/ResetPassword.jsx';
 import { jwtDecode } from 'jwt-decode';
 import OrderModal from './components/OrderModal.jsx';
+import ProtectedRoute from './components/ProtectedRoute.jsx';
 
 import { useState, useEffect } from 'react';
 import { Package, AlertTriangle, Truck, Activity, Plus } from "lucide-react";
@@ -105,14 +107,20 @@ function App() {
               {/* Nested Routes inside your Dashboard Layout */}
               <Routes>
                 <Route path="/" element={<MainDashboardView setIsOpen={setIsOpen} WAREHOUSE_POINTS={WAREHOUSE_POINTS} />} />
-                <Route path="/orders" element={<Orders />} />
-                <Route path="/logistics" element={<Logistics />} />
-                <Route path="/inventory" element={<Inventory />} />
-                <Route path="/fleet" element={<Fleet />} />
-                <Route path="/warehouse" element={<WarehouseManagement />} />
-                <Route path="/zones" element={<Zones />} />
+                <Route element={<ProtectedRoute allowedRoles={['system_admin', 'warehouse_manager', 'warehouse_staff', 'inventory_manager', 'inventory_staff', 'logistics_manager']} />}>
+                  <Route path="/orders" element={<Orders />} />
+                  <Route path="/warehouse" element={<WarehouseManagement />} />
+                  <Route path="/zones" element={<Zones />} />
+                </Route>
+                <Route element={<ProtectedRoute allowedRoles={['system_admin', 'warehouse_manager', 'logistics_manager']} />}>
+                  <Route path="/logistics" element={<Logistics />} />
+                  <Route path="/fleet" element={<Fleet />} />
+                </Route>
+                <Route element={<ProtectedRoute allowedRoles={['system_admin', 'warehouse_manager', 'warehouse_staff', 'inventory_manager', 'inventory_staff']} />}>
+                  <Route path="/inventory" element={<Inventory />} />
+                </Route>
+                <Route path="/unauthorized" element={<Unauthorized />} />
                 {userRole === 'system_admin' && <Route path="/user" element={<User />} />}
-                
                 {/* Fallback route - redirects unknown URLs back to dashboard */}
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>

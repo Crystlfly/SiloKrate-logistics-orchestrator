@@ -2,12 +2,15 @@ import sql from 'mssql';
 import dbconfigSetup from '../dbconfigSetup.js';
 import {Router} from 'express';
 import {addProduct, updateProduct, deleteProduct} from '../services/productService.js';
-import {authenticateToken} from '../middleware/auth.js';
+import {authenticateToken, requireRole} from '../middleware/auth.js';
 
 const router=Router();
 const config = dbconfigSetup;
 
-router.get("/api/inventory", authenticateToken, async (req, res) => {
+router.get("/api/inventory", 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "warehouse_staff", "inventory_manager", "inventory_staff"]), 
+    async (req, res) => {
     try {
         const pool = await sql.connect(config);
         
@@ -101,7 +104,10 @@ router.get("/api/inventory", authenticateToken, async (req, res) => {
     }
 });
 
-router.post('/api/addProduct', authenticateToken, async (req, res) => {
+router.post('/api/addProduct', 
+    authenticateToken, 
+    requireRole(["system_admin", "inventory_manager"]), 
+    async (req, res) => {
     try{
         const productData=req.body;
         const result = await addProduct(productData, req.user?.name);
@@ -112,7 +118,10 @@ router.post('/api/addProduct', authenticateToken, async (req, res) => {
     }
 });
 
-router.put('/api/updateProduct/:id', authenticateToken, async (req, res) => {
+router.put('/api/updateProduct/:id', 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "inventory_manager", "inventory_staff"]), 
+    async (req, res) => {
     try {
         const productId = parseInt(req.params.id, 10);
         const productData = req.body;
@@ -124,7 +133,10 @@ router.put('/api/updateProduct/:id', authenticateToken, async (req, res) => {
     }
 });
 
-router.delete('/api/deleteProduct/:id', authenticateToken, async (req, res) => {
+router.delete('/api/deleteProduct/:id', 
+    authenticateToken, 
+    requireRole(["system_admin", "inventory_manager"]), 
+    async (req, res) => {
     try {
         const productId = parseInt(req.params.id, 10);
         await deleteProduct(productId);

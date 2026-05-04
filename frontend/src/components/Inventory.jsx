@@ -44,12 +44,17 @@ const Inventory = () => {
         credentials: 'include'
       });
       const data = await response.json();
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
         localStorage.removeItem('nexus_user_role');
         localStorage.removeItem('nexus_expires_at');
         window.location.href = '/login';
         return; 
+      }
+
+      else if (response.status === 403) {
+        window.location.href = '/unauthorized';
+        return;
       }
 
       if (data.status === 200) {
@@ -126,12 +131,17 @@ const Inventory = () => {
           },
           credentials: 'include',
         });
-        if (response.status === 401 || response.status === 403) {
+        if (response.status === 401) {
           alert("Your session has expired. Please log in again.");
           localStorage.removeItem('nexus_user_role');
           localStorage.removeItem('nexus_expires_at');
           window.location.href = '/login';
           return; 
+        }
+
+        else if (response.status === 403) {
+          window.location.href = '/unauthorized';
+          return;
         }
 
         if (response.ok) {
@@ -158,8 +168,6 @@ const Inventory = () => {
     fetchInventory();    
   };
 
-  
-
   const handleExport=async ()=>{
     const header=["Name","SKU","reorder_level","current_stock","unit_price","Category","Status"];
     try{
@@ -178,13 +186,19 @@ const Inventory = () => {
         credentials: 'include'
       });
       const result=await response.json();
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
         localStorage.removeItem('nexus_user_role');
         localStorage.removeItem('nexus_expires_at');
         window.location.href = '/login';
         return; 
       }
+
+      else if (response.status === 403) {
+        window.location.href = '/unauthorized';
+        return;
+      }
+      
       if(result.status==200){
         const data=result.data;
         const rows = data.map(item => [

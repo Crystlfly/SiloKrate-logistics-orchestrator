@@ -1,17 +1,18 @@
-import { Users as UsersIcon, Shield, UserCheck, Package, Search, Download, Plus, Loader2, MoreVertical, ChevronLeft, ChevronRight, Edit, Trash2, Mail, Lock } from 'lucide-react';
+import { Users as UsersIcon, Shield, UserCheck, Package, Search, Download, Plus, Loader2, MoreVertical, ChevronLeft, ChevronRight, Edit, Trash2, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import UserModal from './UserModal';
 import csvDownloadHelper from './csvDownloadHelper'
+import CustomSelect from './CustomSelect';
 
-
-// Role Mapping for Visuals
+// FIX 4: Added missing roles to the map
 const ROLE_MAP = {
   system_admin: { label: "System Admin", color: "purple" },
   inventory_manager: { label: "Inventory Manager", color: "blue" },
+  inventory_staff: { label: "Inventory Staff", color: "orange" },
   logistics_manager: { label: "Logistics Manager", color: "emerald" },
+  warehouse_manager: { label: "Warehouse Manager", color: "zinc" },
   warehouse_staff: { label: "Warehouse Staff", color: "zinc" },
 };
-
 
 const Users = () => {
   const [usersData, setUsersData] = useState([]);
@@ -21,6 +22,7 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageInput, setPageInput] = useState(1); // FIX 2: Added missing state
   const [totalPages, setTotalPages] = useState(1); 
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -38,7 +40,7 @@ const Users = () => {
         page: currentPage,
         limit: itemsPerPage,
         search: searchQuery,
-        category: roleFilter // Backend uses 'category' param for roles based on your snippet
+        category: roleFilter === "All Roles" ? "" : roleFilter 
       });
 
       const response = await fetch(`http://localhost:3000/api/users?${params}`, {
@@ -48,28 +50,28 @@ const Users = () => {
         credentials: 'include'
       });
 
-      if (response.status === 401 || response.status === 403) {
+      if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
         localStorage.removeItem('nexus_user_role');
         localStorage.removeItem('nexus_expires_at');
         window.location.href = '/login';
         return; 
+      } else if (response.status === 403) {
+        window.location.href = '/unauthorized';
+        return;
       }
 
       if (!response.ok) {
-        setUsersData([]); // Force it to be an empty array
+        setUsersData([]); 
         return;
       }
       
       const data = await response.json();
 
-      // Handling response based on your backend structure
-      // If backend returns raw array:
       if (Array.isArray(data)) {
         setUsersData(data);
-        // Calculate mock stats if backend doesn't provide them
         setStats({
-          total: data.length, // Mock or total count from headers if available
+          total: data.length, 
           active: data.length,
           admins: data.filter(u => u.Role === "system_admin").length,
           opCost: data.filter(u => u.Role === "warehouse_staff").length,
@@ -77,7 +79,17 @@ const Users = () => {
       } else {
         const extractedData = data.data || data;
         setUsersData(Array.isArray(extractedData) ? extractedData : []);
-        // setUsersData(data.data || data); 
+
+        setStats({
+          total: data.pagination?.totalItems || extractedData.length, 
+          active: data.pagination?.totalItems || extractedData.length,
+          admins: extractedData.filter(u => u.Role === "system_admin").length,
+          opCost: extractedData.filter(u => u.Role === "warehouse_staff").length,
+        });
+        
+        // FIX 3: Update total pages from backend so 'Next' button works!
+        const fetchedPages = data.pagination?.totalPages || 1;
+        setTotalPages(fetchedPages === 0 ? 1 : fetchedPages); 
       }
 
     } catch (err) {
@@ -88,12 +100,65 @@ const Users = () => {
     }
   };
   
+  // Refetch when filters or page change
   useEffect(() => {
     const timer = setTimeout(() => {
         fetchUsers();
     }, 500);
     return () => clearTimeout(timer); 
   }, [currentPage, searchQuery, roleFilter]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+      setCurrentPage(1);
+  }, [searchQuery, roleFilter]);
+
+  // --- FIX 1: REMOVED THE ROGUE fetchInventory useEffect ---
+
+  // Pagination Handlers
+  const handleNextPage = () => {
+    if (currentPage < totalPages) setCurrentPage(prev => prev + 1);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 1) setCurrentPage(prev => prev - 1);
+  };
+
+  // Safe Input Handlers
+  useEffect(() => {
+    if (currentPage < 1) setCurrentPage(1);
+    setPageInput(currentPage < 1 ? 1 : currentPage);
+  }, [currentPage]);
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      let value = parseInt(pageInput);
+      if (isNaN(value)) return;
+      if (value < 1) value = 1;
+      
+      const maxPage = totalPages > 0 ? totalPages : 1;
+      if (value > maxPage) value = maxPage;
+  
+      if (value !== currentPage) {
+        setCurrentPage(value);
+      }
+    }, 800); 
+  
+    return () => clearTimeout(timer);
+  }, [pageInput, totalPages, currentPage]);
+  
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter") {
+      let value = parseInt(pageInput);
+      if (!value || isNaN(value)) value = 1;
+      if (value < 1) value = 1;
+      
+      const maxPage = totalPages > 0 ? totalPages : 1;
+      if (value > maxPage) value = maxPage;
+  
+      setCurrentPage(value);
+    }
+  };
 
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to remove this user access?")) {
@@ -106,20 +171,22 @@ const Users = () => {
           credentials: 'include',
         });
 
-        if (response.status === 401 || response.status === 403) {
+        if (response.status === 401) {
           alert("Your session has expired. Please log in again.");
           localStorage.removeItem('nexus_user_role');
           localStorage.removeItem('nexus_expires_at');
           window.location.href = '/login';
           return; 
+        } else if (response.status === 403) {
+          window.location.href = '/unauthorized';
+          return;
         }
 
         if (response.ok) {
           fetchUsers(); 
         } else if (response.status === 403) {
-          alert('You do not have permission to delete yourself user.');
-        }
-        else {
+          alert('You do not have permission to delete yourself.');
+        } else {
           alert('Failed to delete user');
         }
       } catch (err) {
@@ -139,10 +206,10 @@ const Users = () => {
     fetchUsers();    
   };
 
-  const handleExport=async ()=>{
-    const header=["FullName", "Email", "Role"];
-    try{
-      const params = new URLSearchParams({
+  const handleExport = async () => {
+    const header = ["FullName", "Email", "Role"];
+    try {
+      const params = newSearchParams({
       page: 1,
       limit: 100000,
       search: searchQuery,
@@ -155,29 +222,32 @@ const Users = () => {
         },
         credentials: 'include'
       });
-      if (response.status === 401 || response.status === 403) {
+
+      if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
         localStorage.removeItem('nexus_user_role');
         localStorage.removeItem('nexus_expires_at');
         window.location.href = '/login';
         return; 
+      } else if (response.status === 403) {
+        window.location.href = '/unauthorized';
+        return;
       }
-      const data=await response.json();
+      
+      const data = await response.json();
       
       if (Array.isArray(data) && data.length > 0) {
-      // Map the SQL columns (FullName, Email, Role) to CSV rows
       const rows = data?.map(user => [
         `"${user.FullName || 'N/A'}"`, 
         user.Email || 'N/A',
         ROLE_MAP[user.Role]?.label || user.Role || 'N/A'
       ]);
       
-      // Execute download
       csvDownloadHelper(header, rows);
     } else {
       alert("No users found to export.");
     }
-  }catch(err){
+  } catch(err) {
       console.error("Error in downloading:", err);
     }
   }
@@ -197,12 +267,12 @@ const Users = () => {
         </div>
         <div className="flex gap-3">
           <button 
-          onClick={()=>handleExport()}
+          onClick={() => handleExport()}
           className="flex items-center gap-2 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 px-4 py-2 rounded-lg text-sm font-bold transition-all">
             <Download size={16} /> Export List
           </button>
           <button 
-          onClick={()=>setIsOpen(true)}
+          onClick={() => setIsOpen(true)}
           className="flex items-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-black px-4 py-2 rounded-lg text-sm font-bold transition-all shadow-[0_0_15px_rgba(16,185,129,0.2)]">
             <Plus size={16} /> Add User
           </button>
@@ -231,16 +301,39 @@ const Users = () => {
             className="w-full bg-[#0B0E14] border border-zinc-800 rounded-lg py-2.5 pl-10 pr-4 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50 transition-colors"
           />
         </div>
-        <select 
-        value={roleFilter}
-        onChange={(e) => setRoleFilter(e.target.value)}
-        className="bg-[#0B0E14] border border-zinc-800 rounded-lg px-4 py-2 text-sm text-zinc-300 outline-none">
-          <option>All Roles</option>
-          <option value="system_admin">Admin</option>
-          <option value="inventory_manager">Inventory Manager</option>
-          <option value="logistics_manager">Logistics Manager</option>
-          <option value="warehouse_staff">Warehouse Staff</option>
-        </select>
+        
+        <CustomSelect 
+          value={
+            roleFilter === 'system_admin' ? 'System Admin' :
+            roleFilter === 'inventory_manager' ? 'Inventory Manager' :
+            roleFilter === 'inventory_staff' ? 'Inventory Staff' :
+            roleFilter === 'logistics_manager' ? 'Logistics Manager' :
+            roleFilter === 'warehouse_manager' ? 'Warehouse Manager' :
+            roleFilter === 'warehouse_staff' ? 'Warehouse Staff' :
+            'All Roles'
+          }
+          onChange={(selectedValue) => {
+            const filterMap = {
+              'All Roles': 'All Roles',
+              'System Admin': 'system_admin',
+              'Inventory Manager': 'inventory_manager',
+              'Inventory Staff': 'inventory_staff',
+              'Logistics Manager': 'logistics_manager',
+              'Warehouse Manager': 'warehouse_manager',
+              'Warehouse Staff': 'warehouse_staff'
+            };
+            setRoleFilter(filterMap[selectedValue] || 'All Roles');
+          }}
+          options={[
+            'All Roles', 
+            'System Admin', 
+            'Inventory Manager', 
+            'Inventory Staff',
+            'Logistics Manager', 
+            'Warehouse Manager', 
+            'Warehouse Staff'
+          ]}
+        />
       </div>
 
       {/* Users Table */}
@@ -278,21 +371,31 @@ const Users = () => {
           </tbody>
         </table>
         
-        {/* Pagination Footer */}
+        {/* Updated Pagination Footer matching Logistics */}
         <div className="p-4 border-t border-zinc-800 flex justify-between items-center bg-white/[0.02]">
           <button 
-            onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+            onClick={handlePrevPage}
             disabled={currentPage === 1 || isLoading}
             className="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             <ChevronLeft size={14} /> Previous
           </button>
-          <span className="text-xs text-zinc-500 font-medium">
-            Page <span className="text-white">{currentPage}</span>
-          </span>
+
+          <span className="text-xs text-zinc-500 font-medium flex items-center gap-2">
+            Page
+            <input
+              type="text"
+              value={pageInput}
+              onChange={(e) => setPageInput(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="w-12 text-center bg-[#0F1219] border border-zinc-800 rounded px-2 py-1 text-white focus:border-emerald-500/50 outline-none"
+            />
+              of {totalPages || 1}
+          </span> 
+
           <button 
-            onClick={() => setCurrentPage(p => p + 1)}
-            disabled={isLoading || usersData.length < itemsPerPage}
+            onClick={handleNextPage}
+            disabled={currentPage === totalPages || isLoading}
             className="flex items-center gap-1 text-xs font-bold text-zinc-400 hover:text-white disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
           >
             Next <ChevronRight size={14} />
@@ -329,7 +432,6 @@ const UserRow = ({ user, isOpen, onToggle, onDelete, onUpdate }) => {
   const { UserId, FullName, Email, Role } = user;
   const roleConfig = ROLE_MAP[Role ?? "warehouse_staff"];
   
-  // Mock status based on randomness or logic since API doesn't return it
   const isOnline = Math.random() > 0.5;
 
   const getRoleBadge = (color) => {
