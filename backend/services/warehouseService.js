@@ -12,19 +12,16 @@ export async function addWarehouse(warehouseData, authenticatedUsername) {
         const pool = await establishConnection(config);
         
         const name = warehouseData.name;
-        // Parse floats for coordinates and cost
         const latitude = parseFloat(warehouseData.latitude);
         const longitude = parseFloat(warehouseData.longitude);
         const operating_cost = parseFloat(warehouseData.operating_cost);
         
-        // Parse integers for capacity and staff
         const total_capacity = parseInt(warehouseData.total_capacity, 10);
         const used_capacity = parseInt(warehouseData.used_capacity, 10);
         const total_staff = parseInt(warehouseData.total_staff, 10);
         
         const { warehouse_type, status } = warehouseData;
 
-        // Check if latitude is NaN (Not a Number) after parsing
         if (isNaN(latitude) || isNaN(longitude)) {
              throw new Error("Invalid Latitude or Longitude values.");
         }

@@ -4,77 +4,61 @@ import { createOrder } from '../services/orderService.js';
 import { updateOrderStatus } from '../services/orderService.js';
 import {authenticateToken, requireRole} from '../middleware/auth.js';
 import dbconfigSetup from '../dbconfigSetup.js';
+import { packOrderAndDispatch, setVehicleIdleAndMatch } from '../services/dispatchService.js'; 
 
 const config = dbconfigSetup;
 const router = Router();
 
-router.get('/api/orders', 
-    authenticateToken, 
-    requireRole(["system_admin", "warehouse_manager", "logistics_manager", "inventory_manager", "warehouse_staff", "inventory_staff"]), 
-    async (req, res) => {
+router.get(
+  '/api/orders', authenticateToken, 
+  requireRole(["system_admin", "warehouse_manager", "logistics_manager", "inventory_manager", "warehouse_staff", "inventory_staff"]), async (req, res) => {
     try {
-        const pool = await sql.connect(config);
-        const page= parseInt(req.query.page) || 1;
-        const limit= parseInt(req.query.limit) || 10;
-        const offset = (page - 1) * limit;
+      const pool = await sql.connect(config);
 
-        const search = req.query.search || "";
-        const status = req.query.status || "";
-        const priority = req.query.priority || "";
-        let whereClause = "WHERE 1=1";
-        const createRequest = () => {
-            const req = pool.request();
-            if (search) req.input("search", sql.VarChar, `%${search}%`);
-            if (status) req.input("status", sql.VarChar, status);
-            if (priority) req.input("priority", sql.Int, parseInt(priority));
+      const page = parseInt(req.query.page) || 1;
+      const limit = parseInt(req.query.limit) || 10;
+      const offset = (page - 1) * limit;
 
-            req.input("offset", sql.Int, offset);
-            req.input("limit", sql.Int, limit);
-            
-            return req;
-        };
+      const search = req.query.search || "";
+      const status = req.query.status || "";
+      const priority = req.query.priority
+        ? parseInt(req.query.priority)
+        : null;
 
-        if (search) {
-            whereClause += " AND (CAST(order_id AS VARCHAR(255)) LIKE @search OR CAST(product_id AS VARCHAR(255)) LIKE @search OR CAST(destination_address AS VARCHAR(255)) LIKE @search) OR customer_name LIKE @search ";
+      const result = await pool
+        .request()
+        .input("Search", sql.VarChar, search)
+        .input("Status", sql.VarChar, status)
+        .input("Priority", sql.Int, priority)
+        .input("Offset", sql.Int, offset)
+        .input("Limit", sql.Int, limit)
+        .execute("GetOrders");
+
+      const orders = result.recordsets[0];
+      const totalItems = result.recordsets[1][0].total;
+
+      res.status(200).json({
+        status: 200,
+        data: orders,
+        pagination: {
+          page,
+          limit,
+          totalItems,
+          totalPages: Math.ceil(totalItems / limit)
         }
-        if (status) {
-            whereClause += " AND order_status = @status";
-        }
-        if (priority) {
-            whereClause += " AND priority_level = @priority";
-        }
+      });
 
-        const dataQuery = await createRequest().query(`SELECT * FROM AllOrdersDetails
-            ${whereClause} 
-            ORDER BY order_id DESC 
-            OFFSET @offset ROWS 
-            FETCH NEXT @limit ROWS ONLY`);
-        const countQuery = await createRequest().query(`SELECT COUNT(*) as total FROM AllOrdersDetails ${whereClause}`);
+    } catch (err) {
+      console.error("Orders Fetch Error:", err.message);
 
-        const totalItems = countQuery.recordset[0].total;
-        const totalPages = Math.ceil(totalItems / limit);
-        
-        res.status(200).json({
-            status: 200, 
-            data: dataQuery.recordset,
-            pagination: {
-                page,
-                limit,
-                totalItems,
-                totalPages
-            }
-        });
-
-    } catch(err) {
-        console.error("Orders Fetch Error:", err.message);
-        
-        res.status(500).json({
-            status: 500, 
-            message: "Failed to fetch orders from the database.",
-            error: err.message
-        });
+      res.status(500).json({
+        status: 500,
+        message: "Failed to fetch orders from the database.",
+        error: err.message
+      });
     }
-});
+  }
+);
 
 router.post('/api/orders', 
     authenticateToken, 
@@ -112,6 +96,52 @@ router.patch('/api/orders/:id/status',
         res.status(200).json({
             status: 200,
             message: "Order status updated successfully."
+        });
+        console.log(`Order ${orderId} status updated to ${newStatus}`);
+    } catch (err) {
+        res.status(500).json({
+            status: 500,
+            message: err.message
+        });
+    }
+});
+
+router.post('/api/orders/:id/pack', 
+    authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "warehouse_staff"]), 
+    async (req, res) => {
+    
+    const orderId = parseInt(req.params.id);
+    
+    try {
+        const result = await packOrderAndDispatch(orderId);
+        res.status(result.status).json({
+            status: result.status,
+            message: result.message,
+            vehicleId: result.vehicleId || null
+        });
+    } catch (err) {
+        res.status(500).json({
+            status: 500,
+            message: err.message
+        });
+    }
+});
+
+router.post('/api/fleet/:id/idle', 
+    authenticateToken, 
+    // Assuming you have a driver or logistics role for fleet management
+    requireRole(["system_admin", "logistics_manager", "driver"]), 
+    async (req, res) => {
+    
+    const vehicleId = parseInt(req.params.id);
+
+    try {
+        const result = await setVehicleIdleAndMatch(vehicleId);
+        res.status(result.status).json({
+            status: result.status,
+            message: result.message,
+            orderId: result.orderId || null
         });
     } catch (err) {
         res.status(500).json({

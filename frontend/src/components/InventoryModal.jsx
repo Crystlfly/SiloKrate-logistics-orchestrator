@@ -71,7 +71,7 @@ export default function InventoryModal({isOpen, onCloseAction, initialToBeUpdate
         };
 
         try{
-            const endpoint = editMode ? `http://localhost:3000/api/updateProduct/${initialToBeUpdatedData.product_id}` : 'http://localhost:3000/api/addProduct';
+            const endpoint = editMode ? `http://${import.meta.env.VITE_SERVER_URL}/api/updateProduct/${initialToBeUpdatedData.product_id}` : `http://${import.meta.env.VITE_SERVER_URL}/api/addProduct`;
             const method = editMode ? 'PUT' : 'POST';
             const response = await fetch(endpoint, {
                 method: method,
@@ -85,8 +85,8 @@ export default function InventoryModal({isOpen, onCloseAction, initialToBeUpdate
 
             if (response.status === 401) {
                 alert("Your session has expired. Please log in again.");
-                localStorage.removeItem('nexus_user_role');
-                localStorage.removeItem('nexus_expires_at');
+                localStorage.removeItem('SiloKrate_user_role');
+                localStorage.removeItem('SiloKrate_expires_at');
                 window.location.href = '/login';
                 return; 
             }
@@ -96,7 +96,6 @@ export default function InventoryModal({isOpen, onCloseAction, initialToBeUpdate
                 return;
             }
 
-            // 1. Check if the HTTP request was successful (Status 200-299)
             if (response.ok) {
                 setStatus('success');
                 setTimeout(() => {
@@ -105,7 +104,6 @@ export default function InventoryModal({isOpen, onCloseAction, initialToBeUpdate
                 }, 2000);
             } 
             else {
-                // 2. If response.ok is false (e.g. 400 or 500 error), get the error message
                 const errorData = await response.json();
                 throw new Error(errorData.message || (editMode ? 'Failed to update SKU' : 'Failed to add SKU'));
             }
@@ -127,7 +125,7 @@ export default function InventoryModal({isOpen, onCloseAction, initialToBeUpdate
                 <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-[#161A22]">
                     <div>
                         <h2 className="text-lg font-bold text-white tracking-tight">{editMode ? "Update SKU" : "Add New SKU"}</h2>
-                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Nexus Inventory Protocol</p>
+                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">SiloKrate Inventory Protocol</p>
                     </div>
                     <button 
                         disabled={status === 'loading'} 

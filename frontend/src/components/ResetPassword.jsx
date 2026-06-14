@@ -21,7 +21,7 @@ const ResetPasswordPage = () => {
 
     setStatus('loading');
     try {
-      const res = await fetch("http://localhost:3000/api/reset-password", {
+      const res = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/reset-password`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, newPassword: formData.password })
@@ -30,8 +30,8 @@ const ResetPasswordPage = () => {
 
       if (res.ok) {
         setStatus('success');
-        localStorage.removeItem('nexus_user_role');
-        localStorage.removeItem('nexus_expires_at');
+        localStorage.removeItem('SiloKrate_user_role');
+        localStorage.removeItem('SiloKrate_expires_at');
         setTimeout(() => navigate('/login'), 3000);
       } else {
         setStatus('error');
@@ -51,7 +51,7 @@ const ResetPasswordPage = () => {
         </div>
         <h2 className="text-4xl font-black text-white mb-4">Password Updated</h2>
         <p className="text-zinc-500 text-center max-w-sm mb-8">
-          Your Nexus account security has been updated. Redirecting you to login...
+          Your SiloKrate account security has been updated. Redirecting you to login...
         </p>
       </div>
     );
@@ -70,7 +70,7 @@ const ResetPasswordPage = () => {
           <Box className="text-white w-7 h-7" />
         </div>
         <h1 className="text-5xl font-black text-white leading-tight">
-          Secure Your <br/> <span className="text-emerald-500">Nexus Account</span>
+          Secure Your <br/> <span className="text-emerald-500">SiloKrate Account</span>
         </h1>
         <p className="text-zinc-400 mt-6 max-w-md text-md leading-relaxed font-medium">
           Create a strong, unique password to maintain operational integrity across your logistics network.

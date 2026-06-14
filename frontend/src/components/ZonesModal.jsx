@@ -1,7 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { Search, X, Box, Thermometer, Activity, Layers } from 'lucide-react';
 
-// --- 1. SHARED ZONE CARD COMPONENT ---
 export const ZoneCard = ({ name, location, volume, capacity, temp, percentage, type, alert }) => {
   return (
     <div className={`p-4 rounded-xl border ${alert ? 'border-rose-500/30 bg-rose-500/5' : 'border-zinc-800 bg-[#0F1219]'} transition-all hover:border-zinc-700`}>
@@ -63,7 +62,7 @@ export const ZoneCard = ({ name, location, volume, capacity, temp, percentage, t
   );
 };
 
-// --- 2. MAIN MODAL COMPONENT ---
+//MAIN MODAL
 const ZonesModal = ({ data, onClose }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("All Types");

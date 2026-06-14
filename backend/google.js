@@ -2,7 +2,6 @@ import jwt from 'jsonwebtoken';
 import { Router } from 'express';
 import sql from 'mssql';
 import dbconfigSetup from './dbconfigSetup.js';
-// No import axios needed!
 
 const router = Router();
 const config = dbconfigSetup;
@@ -60,13 +59,13 @@ router.post("/api/google", async (req, res) => {
         }
 
         // 4. Generate JWT for your app
-        const nexusToken = jwt.sign(
+        const SiloKrateToken = jwt.sign(
             { id: userId, email: email, role: 'user' },
             process.env.JWT_SECRET,
             { expiresIn: '24h' }
         );
 
-        res.json({ success: true, token: nexusToken });
+        res.json({ success: true, token: SiloKrateToken });
 
     } catch (err) {
         console.error("Google Auth Error:", err);

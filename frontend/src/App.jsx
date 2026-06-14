@@ -9,7 +9,7 @@ import Zones from './components/Zones.jsx';
 import User from './components/User.jsx';
 import Signup from './components/Signup.jsx';
 import Login from './components/Login.jsx';
-import NexusSplash from './components/NexusSplash.jsx';
+import SiloKrateSplash from './components/SiloKrateSplash.jsx';
 import Unauthorized from './components/Unauthorized.jsx';
 import { Routes, Route, Navigate, useNavigate, useLocation } from 'react-router-dom'; 
 import ResetPasswordPage from './components/ResetPassword.jsx';
@@ -17,12 +17,13 @@ import { jwtDecode } from 'jwt-decode';
 import OrderModal from './components/OrderModal.jsx';
 import ProtectedRoute from './components/ProtectedRoute.jsx';
 import ChatWidget from './components/ai-bot/ChatWidget.jsx';
+import SetupPassword from './components/SetupPassword';
 
 import { useState, useEffect } from 'react';
 import { Package, AlertTriangle, Truck, Activity, Plus } from "lucide-react";
 
 const checkTokenValidity = () => {
-  const expiresAt = localStorage.getItem('nexus_expires_at');
+  const expiresAt = localStorage.getItem('SiloKrate_expires_at');
   if (!expiresAt) return false;
   
   return Date.now() < parseInt(expiresAt);
@@ -35,28 +36,28 @@ function App() {
 
   const [isLoggedIn, setIsLoggedIn] = useState(checkTokenValidity);
 
-  const userRole = (localStorage.getItem('nexus_user_role'));
-  const expiresAt = localStorage.getItem('nexus_expires_at');
+  const userRole = (localStorage.getItem('SiloKrate_user_role'));
+  const expiresAt = localStorage.getItem('SiloKrate_expires_at');
   const [WAREHOUSE_POINTS, setWAREHOUSE_POINTS] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const handleLogin = (role, expiresAt) => {
-    localStorage.setItem('nexus_user_role', role);
-    localStorage.setItem('nexus_expires_at', expiresAt);
+    localStorage.setItem('SiloKrate_user_role', role);
+    localStorage.setItem('SiloKrate_expires_at', expiresAt);
     setIsLoggedIn(true);
     navigate('/');
   };
 
   const handleLogout = async () => {
-    await fetch('http://localhost:3000/api/auth/logout', { 
+    await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/auth/logout`, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json' 
         },
         credentials: 'include' 
     });
-    localStorage.removeItem('nexus_user_role');
-    localStorage.removeItem('nexus_expires_at');
+    localStorage.removeItem('SiloKrate_user_role');
+    localStorage.removeItem('SiloKrate_expires_at');
     setIsLoggedIn(false);
     navigate('/login');
   };
@@ -69,7 +70,7 @@ function App() {
   }, [location.pathname, isLoggedIn]);
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/logistics/coordinates", {
+    fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/logistics/coordinates`, {
       credentials: 'include'
     })
       .then((res) => res.json())
@@ -86,10 +87,9 @@ function App() {
   }, []);
 
   if (isLoading) {
-    return <NexusSplash />;
+    return <SiloKrateSplash />;
   }
 
-  // We removed the <Router> wrapper here!
   return (
     <>
       <Routes>
@@ -100,6 +100,7 @@ function App() {
           <>
             <Route path="/login" element={<Login onLogin={handleLogin} />} />
             <Route path="*" element={<Navigate to="/login" replace />} />
+            <Route path="/setup-password" element={<SetupPassword />} />
           </>
         ) : (
           /* PROTECTED ROUTES */
@@ -136,7 +137,6 @@ function App() {
 }
 
 const MainDashboardView = ({ setIsOpen, WAREHOUSE_POINTS }) => {
-  // 1. Setup state to hold the live data from your SQL Database
   const [stats, setStats] = useState({
     totalActiveOrders: 0,
     criticalInventoryAlerts: 0,
@@ -146,7 +146,7 @@ const MainDashboardView = ({ setIsOpen, WAREHOUSE_POINTS }) => {
   });
 
   useEffect(() => {
-    fetch("http://localhost:3000/api/dashboard-stats", {
+    fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/dashboard-stats`, {
       credentials: 'include'
     })
       .then((res) => res.json())
@@ -162,7 +162,7 @@ const MainDashboardView = ({ setIsOpen, WAREHOUSE_POINTS }) => {
     <>
       <header className="my-5 flex justify-between items-end">
         <div>
-          <h1 className="text-2xl font-black text-white tracking-tight">Nexus</h1>
+          <h1 className="text-2xl font-black text-white tracking-tight">SiloKrate</h1>
           <p className="text-sm text-zinc-500 mt-1">Logistics Command Center</p>
         </div>
         <button 
@@ -246,7 +246,6 @@ const MainDashboardView = ({ setIsOpen, WAREHOUSE_POINTS }) => {
   );
 };
 
-// --- SUB-COMPONENTS ---
 const StatCard = ({ icon, label, value, trend, sub, color }) => (
   <div className="bg-[#0F1219] border border-zinc-800 p-5 rounded-xl">
     <div className="flex justify-between items-start mb-4">

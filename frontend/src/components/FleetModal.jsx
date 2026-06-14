@@ -55,8 +55,6 @@ export default function FleetModal({isOpen, onCloseAction, initialToBeUpdatedDat
         setErrorMessage('');
     
 
-        // 1. Create a cleaned payload object
-        // We convert the form strings to Integers so the Database doesn't complain
         const payload = {
             ...formData,
             // Convert "105" string to 105 integer. If empty, send null.
@@ -69,7 +67,7 @@ export default function FleetModal({isOpen, onCloseAction, initialToBeUpdatedDat
         };
 
         try {
-            const endpoint = editMode ? `http://localhost:3000/api/updateFleet/${initialToBeUpdatedData.vehicle_id}` : 'http://localhost:3000/api/addFleet';
+            const endpoint = editMode ? `http://${import.meta.env.VITE_SERVER_URL}/api/updateFleet/${initialToBeUpdatedData.vehicle_id}` : `http://${import.meta.env.VITE_SERVER_URL}/api/addFleet`;
             const method = editMode ? 'PUT' : 'POST';
             const response = await fetch(endpoint, {
                 method: method,
@@ -77,13 +75,13 @@ export default function FleetModal({isOpen, onCloseAction, initialToBeUpdatedDat
                     'Content-Type': 'application/json'
                 },
                 credentials: 'include',
-                body: JSON.stringify(payload) // <--- Send 'payload', NOT 'formData'
+                body: JSON.stringify(payload)
             });
 
             if (response.status === 401) {
                 alert("Your session has expired. Please log in again.");
-                localStorage.removeItem('nexus_user_role');
-                localStorage.removeItem('nexus_expires_at');
+                localStorage.removeItem('SiloKrate_user_role');
+                localStorage.removeItem('SiloKrate_expires_at');
                 window.location.href = '/login';
                 return; 
             }
@@ -95,7 +93,6 @@ export default function FleetModal({isOpen, onCloseAction, initialToBeUpdatedDat
     
             if (response.ok) {
                 setStatus('success');
-                // Optional: Auto-close after 2 seconds
                 setTimeout(() => {
                     onCloseAction();
                     setStatus('idle');
@@ -103,7 +100,6 @@ export default function FleetModal({isOpen, onCloseAction, initialToBeUpdatedDat
             } 
             else {
                 const errorData = await response.json().catch(() => ({}));
-                // Updated error text to match the context (Vehicle, not Warehouse)
                 throw new Error(errorData.message || 'Failed to add vehicle');
             }
         } catch (error) {
@@ -124,7 +120,7 @@ export default function FleetModal({isOpen, onCloseAction, initialToBeUpdatedDat
                 <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-[#161A22]">
                     <div>
                         <h2 className="text-lg font-bold text-white tracking-tight">{editMode ? "Update Vehicle" : "Add New Vehicle"}</h2>
-                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Nexus Fleet Protocol</p>
+                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">SiloKrate Fleet Protocol</p>
                     </div>
                     <button 
                         disabled={status === 'loading'} 

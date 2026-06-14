@@ -7,13 +7,11 @@ import {
 import CustomSelect from './CustomSelect'; 
 import ActivityFeed from './ActivityFeed';
 
-// IMPORT SUB-COMPONENTS
-import WarehouseModal from './WarehouseModal'; // You said you have this
-import Zones from './Zones'; // The file we just created
+import WarehouseModal from './WarehouseModal';
+import Zones from './Zones';
 
 const WarehouseManagement = () => {
   const userRole = (localStorage.getItem('userRole'));
-  // --- STATE: WAREHOUSES ---
   const [warehouseData, setWarehouseData] = useState([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -29,7 +27,6 @@ const WarehouseManagement = () => {
   const [typeFilterWarehouse, setTypeFilterWarehouse] = useState("All Types");
   const itemsPerPage = 10;
 
-  // --- FETCH WAREHOUSES ---
   const fetchWarehouses = async () => {
       try {
         const params = new URLSearchParams({
@@ -39,7 +36,7 @@ const WarehouseManagement = () => {
           type: typeFilterWarehouse !== "All Types" ? typeFilterWarehouse : ""
         });
 
-        const response = await fetch(`http://localhost:3000/api/warehouses?${params}`,{
+        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/warehouses?${params}`,{
           headers: {
             'Content-Type': 'application/json'
           },
@@ -47,8 +44,8 @@ const WarehouseManagement = () => {
         });
         if (response.status === 401) {
           alert("Your session has expired. Please log in again.");
-          localStorage.removeItem('nexus_user_role');
-          localStorage.removeItem('nexus_expires_at');
+          localStorage.removeItem('SiloKrate_user_role');
+          localStorage.removeItem('SiloKrate_expires_at');
           window.location.href = '/login';
           return; 
         }
@@ -122,7 +119,7 @@ const WarehouseManagement = () => {
       setCurrentPage(value);
     }
   };
-  // --- METRICS ---
+
   const metrics = useMemo(() => {
     if (!warehouseData.length) return { cost: 0, staff: 0, totalCap: 0, usedCap: 0, util: 0, active: 0 };
     const cost = warehouseData.reduce((acc, curr) => acc + (Number(curr.cost) || 0), 0);
@@ -134,7 +131,7 @@ const WarehouseManagement = () => {
     return { cost, staff, totalCap, usedCap, util, active };
   }, [warehouseData]);
 
-  // --- HANDLERS ---
+  //HANDLERS
   const toggleMenu = (id) => setOpenMenuId(openMenuId === id ? null : id);
   const handleUpdate = (item) => { setSelectedItem(item); setIsOpen(true); };
   const handleCloseModal = () => { setIsOpen(false); setSelectedItem(null); fetchWarehouses(); };
@@ -146,7 +143,7 @@ const WarehouseManagement = () => {
     if (window.confirm("Are you sure?")) {
       try {
         const numericId = id.replace('WH-', '');
-        const response = await fetch(`http://localhost:3000/api/deleteWarehouse/${numericId}`, {
+        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/deleteWarehouse/${numericId}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',
@@ -154,8 +151,8 @@ const WarehouseManagement = () => {
         });
         if (response.status === 401 ) {
           alert("Your session has expired. Please log in again.");
-          localStorage.removeItem('nexus_user_role');
-          localStorage.removeItem('nexus_expires_at');
+          localStorage.removeItem('SiloKrate_user_role');
+          localStorage.removeItem('SiloKrate_expires_at');
           window.location.href = '/login';
           return; 
         }
@@ -276,7 +273,7 @@ const WarehouseManagement = () => {
   );
 };
 
-// --- HELPER COMPONENTS (Can stay in WarehouseManagement to avoid too many files) ---
+//HELPER COMPONENTS
 
 const MetricCard = ({ icon, label, value, sub, color }) => (
   <div className="bg-[#0F1219] border border-zinc-800 p-5 rounded-xl hover:border-zinc-700 transition-colors">

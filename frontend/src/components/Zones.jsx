@@ -8,7 +8,6 @@ const Zones = () => {
   const [totalPages, setTotalPages] = useState(0); 
   const itemsPerPage=150;  
 
-  // --- FETCH ZONES DATA ---
   useEffect(() => {
     const fetchZones = async () => {
       try {
@@ -16,7 +15,7 @@ const Zones = () => {
           page: currPage,
           limit: itemsPerPage,
         });
-        const response = await fetch(`http://localhost:3000/api/zones?${params}`, {
+        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/zones?${params}`, {
           headers: {
             'Content-Type': 'application/json'
           },
@@ -24,8 +23,8 @@ const Zones = () => {
         });
         if (response.status === 401 ) {
           alert("Your session has expired. Please log in again.");
-          localStorage.removeItem('nexus_user_role');
-          localStorage.removeItem('nexus_expires_at');
+          localStorage.removeItem('SiloKrate_user_role');
+          localStorage.removeItem('SiloKrate_expires_at');
           window.location.href = '/login';
           return; 
         }
@@ -64,13 +63,13 @@ const Zones = () => {
     fetchZones();
   }, [currPage]); 
 
-  // --- DASHBOARD LOGIC: TOP 6 CRITICAL ---
+  //DASHBOARD LOGIC: TOP 6 CRITICAL
   const dashboardZones = useMemo(() => {
     return [...zoneData]
       .sort((a, b) => {
         if (a.alert && !b.alert) return -1; // Alerts first
         if (!a.alert && b.alert) return 1;
-        return Number(b.percentage) - Number(a.percentage); // Then sort by highest %
+        return Number(b.percentage) - Number(a.percentage); // Then sorting by highest %
       })
       .slice(0, 4);
   }, [zoneData]);

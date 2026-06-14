@@ -2,12 +2,15 @@ import {Router} from 'express';
 import sql from 'mssql';
 import dbconfigSetup from '../dbconfigSetup.js';
 import {addFleet, updateFleet, deleteFleet} from '../services/vehicleService.js';
-import {authenticateToken} from '../middleware/auth.js';
+import {authenticateToken, requireRole} from '../middleware/auth.js';
+
 
 const config = dbconfigSetup;
 const router = Router();
 
-router.get('/api/activities', async (req, res) => {
+router.get('/api/activities', authenticateToken, 
+    requireRole(["system_admin", "warehouse_manager", "logistics_manager", "inventory_manager", "warehouse_staff", "inventory_staff"]),
+    async (req, res) => {
     try {
         const pool = await sql.connect(config);
         

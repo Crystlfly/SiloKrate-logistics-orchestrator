@@ -7,8 +7,8 @@ import {
   Search,
   Loader2,
   MoreVertical,
-  ChevronLeft,   // ADDED THIS
-  ChevronRight   // ADDED THIS
+  ChevronLeft,  
+  ChevronRight   
 } from "lucide-react";
 import CustomSelect from './CustomSelect'; 
 
@@ -35,7 +35,7 @@ const Logistics = () => {
           vehicle: vehicleFilterLogistic
         });
         
-        const response=await fetch(`http://localhost:3000/api/logistics?${params}`,{
+        const response=await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/logistics?${params}`,{
           headers: {
             'Content-Type': 'application/json' 
           },
@@ -44,8 +44,8 @@ const Logistics = () => {
         
         if (response.status === 401) {
           alert("Your session has expired. Please log in again.");
-          localStorage.removeItem('nexus_user_role');
-          localStorage.removeItem('nexus_expires_at');
+          localStorage.removeItem('SiloKrate_user_role');
+          localStorage.removeItem('SiloKrate_expires_at');
           window.location.href = '/login';
           return; 
         } else if (response.status === 403) {
@@ -78,8 +78,6 @@ const Logistics = () => {
   useEffect(() => {
       setCurrentPage(1);
   }, [searchQueryLogistic, statusFilterLogistic, vehicleFilterLogistic]);
-
-  // --- REMOVED THE ROGUE fetchInventory useEffect HERE ---
 
   // Pagination Handlers
   const handleNextPage = () => {
@@ -202,9 +200,8 @@ const Logistics = () => {
               dynamicProgress = 100; 
             }
 
-            // --- THE FIX: ETA CALCULATION ---
-            // 4. Calculate hours remaining based directly on the progress bar percentage
-            const totalHours = 7 * 24; // 168 total hours in your 7-day window
+            // 4. Calculate hours remaining 
+            const totalHours = 7 * 24; // 168 total hours in 7-day window
             const hoursRemaining = Math.floor((totalHours * (100 - dynamicProgress)) / 100);
 
             // 5. Apply context-aware ETA text based on status
@@ -214,7 +211,6 @@ const Logistics = () => {
             } else if (shipment.order_status === 'Packed') {
               safeEta = "Pending Dispatch"; 
             } else {
-              // Only 'In Transit' items will show remaining hours
               safeEta = hoursRemaining > 0 ? `${hoursRemaining}h remaining` : "Arriving Soon";
             }
 
@@ -225,13 +221,13 @@ const Logistics = () => {
               <ShipmentRow
                 key={shipment.order_id}
                 id={`#SHP-${shipment.order_id}`}
-                origin={shipment.origin || "Nexus Hub"}
+                origin={shipment.origin || "SiloKrate Hub"}
                 dest={shipment.destination || "Destination"}
                 status={actualStatus}
                 carrier={shipment.carrier || "N/A"}
                 color={statusColor}
                 progress={dynamicProgress} 
-                eta={safeEta} // using the ETA calculation
+                eta={safeEta}
                 weight={shipment.weight}
               />
             );

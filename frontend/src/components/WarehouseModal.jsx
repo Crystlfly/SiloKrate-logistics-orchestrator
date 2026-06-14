@@ -65,7 +65,7 @@ export default function WarehouseModal({ isOpen, onCloseAction, initialToBeUpdat
                 status: formData.status
             };
 
-            const endpoint = editMode ? `http://localhost:3000/api/updateWarehouse/${initialToBeUpdatedData.warehouse_id}` : 'http://localhost:3000/api/addWarehouse';
+            const endpoint = editMode ? `http://${import.meta.env.VITE_SERVER_URL}/api/updateWarehouse/${initialToBeUpdatedData.warehouse_id}` : `http://${import.meta.env.VITE_SERVER_URL}/api/addWarehouse`;
             const method = editMode ? 'PUT' : 'POST';
             const response = await fetch(endpoint, {
                 method: method,
@@ -78,8 +78,8 @@ export default function WarehouseModal({ isOpen, onCloseAction, initialToBeUpdat
 
             if (response.status === 401) {
                 alert("Your session has expired. Please log in again.");
-                localStorage.removeItem('nexus_user_role');
-                localStorage.removeItem('nexus_expires_at');
+                localStorage.removeItem('SiloKrate_user_role');
+                localStorage.removeItem('SiloKrate_expires_at');
                 window.location.href = '/login';
                 return; 
             }
@@ -88,7 +88,6 @@ export default function WarehouseModal({ isOpen, onCloseAction, initialToBeUpdat
                 return;
             }
 
-            // 1. Check if the HTTP request was successful (Status 200-299)
             if (response.ok) {
                 setStatus('success');
                 setTimeout(() => {
@@ -97,7 +96,6 @@ export default function WarehouseModal({ isOpen, onCloseAction, initialToBeUpdat
                 }, 2000);
             } 
             else {
-                // 2. If response.ok is false (e.g. 400 or 500 error), get the error message
                 const errorData = await response.json();
                 throw new Error(errorData.message || (editMode ? 'Failed to update warehouse' : 'Failed to create warehouse'));
             }
@@ -119,7 +117,7 @@ export default function WarehouseModal({ isOpen, onCloseAction, initialToBeUpdat
                 <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-[#161A22]">
                     <div>
                         <h2 className="text-lg font-bold text-white tracking-tight">{editMode ? "Update Facility" : "Add Facility"}</h2>
-                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Nexus Logistics Protocol</p>
+                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">SiloKrate Logistics Protocol</p>
                     </div>
                     <button 
                         disabled={status === 'loading'} 
