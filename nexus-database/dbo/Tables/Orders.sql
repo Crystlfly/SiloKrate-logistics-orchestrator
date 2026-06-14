@@ -15,3 +15,7 @@ CREATE TABLE [dbo].[Orders] (
     FOREIGN KEY ([product_id]) REFERENCES [dbo].[Products] ([product_id]),
     FOREIGN KEY ([warehouse_id]) REFERENCES [dbo].[Warehouses] ([warehouse_id])
 );
+GO
+
+ALTER TABLE [dbo].[Orders] ADD CONSTRAINT [CK_OrderStatus] CHECK ([order_status]='Pending' OR [order_status]='Packed' OR [order_status]='Shipped' OR [order_status]='Delivered' OR [order_status]='Cancelled');
+
