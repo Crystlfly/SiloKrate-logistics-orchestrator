@@ -16,7 +16,6 @@ router.post("/api/signup", authenticateToken, async (req, res) => {
             return res.status(403).json({ message: "Access Denied: Only Admins can add new users." });
         }
 
-        // 1. Check for existing user using Prepared Statements
         const checkResult = await pool.request()
             .input('email', sql.NVarChar, email)
             .query("SELECT * FROM Users WHERE Email = @email");
@@ -25,20 +24,19 @@ router.post("/api/signup", authenticateToken, async (req, res) => {
             return res.json({ status: 409, message: "User already exists" });
         }
 
-        // 2. Hash the password for security
         const defaultPassword= "Welcome "+ fullName.split(' ')[0] + "123";
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(defaultPassword, salt);
 
-        // 3. Insert using correct Azure SQL columns
         const insertRes = await pool.request()
             .input('fullname', sql.NVarChar, fullName)
             .input('email', sql.NVarChar, email)
             .input('password', sql.NVarChar, hashedPassword)
             .input('role', sql.VarChar(50), role)
+            .input('requiresPasswordChange', sql.Bit, 1)
             .query(`
-                INSERT INTO Users (UserId, FullName, Email, PasswordHash, Role) 
-                VALUES (NEWID(), @fullname, @email, @password, @role)
+                INSERT INTO Users (UserId, FullName, Email, PasswordHash, Role, RequirePasswordChange) 
+                VALUES (NEWID(), @fullname, @email, @password, @role, @requiresPasswordChange)
             `);
 
         if (insertRes.rowsAffected[0] > 0) {

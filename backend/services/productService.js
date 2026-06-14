@@ -72,11 +72,11 @@ export async function addProduct(productData, authenticatedUsername) {
         if (insertResult.recordset && insertResult.recordset[0]) {
             const newProductId = insertResult.recordset[0].product_id;
 
-            // --- LOG RECENT ACTIVITY ---
+            // --- LOGGing RECENT ACTIVITY ---
             await pool.request()
                 .input('wh_id', sql.Int, warehouseId)
                 .input('type', sql.VarChar, 'Inbound Receipt')
-                .input('ref', sql.VarChar, sku) // Using SKU as the reference for new product entry
+                .input('ref', sql.VarChar, sku) 
                 .input('qty', sql.Int, currentStock)
                 .input('status', sql.VarChar, 'Completed')
                 .query(`
@@ -103,7 +103,6 @@ export async function updateProduct(productId, productData) {
         const pool = await establishConnection(config);
         const { name, sku, reorderLevel, currentStock, unitPrice, category, status } = productData;
         
-        // Fetch existing data to know which warehouse to log for
         const existingData = await pool.request()
             .input('id', sql.Int, productId)
             .query('SELECT warehouse_id FROM Products WHERE product_id = @id');
@@ -127,7 +126,6 @@ export async function updateProduct(productId, productData) {
                 WHERE product_id = @id
             `);
 
-        // Log manual adjustment/update
         if (warehouseId) {
             await pool.request()
                 .input('wh_id', sql.Int, warehouseId)

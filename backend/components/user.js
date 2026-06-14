@@ -13,7 +13,7 @@ router.get("/api/users",
     requireRole(["system_admin"]), 
     async (req, res) => {
     try {
-        const pool = await establishConnection(config); // Fixed: Connection Pooling
+        const pool = await establishConnection(config); 
         const page = parseInt(req.query.page) || 1;
         const limit = parseInt(req.query.limit) || 10;
         const offset = (page - 1) * limit;
@@ -21,47 +21,30 @@ router.get("/api/users",
         const search = req.query.search || "";
         const category = req.query.category || "";
 
-        let whereClause = "WHERE 1=1";
-        const createRequest = () => {
-            const req = pool.request();
-            if (search) req.input("search", sql.VarChar, `%${search}%`);
-            if (category && category !== "All Roles") req.input("category", sql.VarChar, category);
-            return req;
-        };
+        const result = await pool.request()
+            .input("Search", sql.VarChar, search)
+            .input("Category", sql.VarChar, category)
+            .input("Offset", sql.Int, offset)
+            .input("Limit", sql.Int, limit)
+            .execute("GetUsers");
 
-        if (search) {
-            whereClause += " AND (FullName LIKE @search OR Email LIKE @search OR Role LIKE @search)";
-        }
-        if (category && category !== "All Roles") {
-            whereClause += " AND Role = @category";
-        }
-        
-        const dataQuery = `
-            SELECT UserId, FullName, Email, Role FROM Users ${whereClause} AND IsDeleted = 0
-            ORDER BY UserId OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY
-        `;
-        const countQuery = `SELECT COUNT(*) as total FROM Users ${whereClause} AND IsDeleted = 0`; // Added count query
+        const users = result.recordset;
 
-        const request = createRequest();
-        request.input("offset", sql.Int, offset);
-        request.input("limit", sql.Int, limit);
+        const totalItems =
+            users.length > 0
+                ? users[0].totalItems
+                : 0;
 
-        const [dataResult, countResult] = await Promise.all([
-            request.query(dataQuery),
-            createRequest().query(countQuery)
-        ]);
-
-        const totalItems = countResult.recordset[0].total;
         const totalPages = Math.ceil(totalItems / limit);
+        const data = users.map(({ totalItems, ...user }) => user);
 
-        // Fixed: Added standardized pagination format
         res.status(200).json({
             status: 200,
-            data: dataResult.recordset,
+            data,
             pagination: {
                 currentPage: page,
-                totalPages: totalPages,
-                totalItems: totalItems,
+                totalPages,
+                totalItems,
                 itemsPerPage: limit
             }
         });

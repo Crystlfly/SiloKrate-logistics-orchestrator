@@ -43,7 +43,7 @@ export default function OrderManagement() {
           priority: priorityFilterOrder === "All Priorities"?"" : priorityFilterOrder=== "Low" ? 1 : priorityFilterOrder === "Normal" ? 2 : 3
         });
 
-        const response = await fetch(`http://localhost:3000/api/orders?${params}`,{
+        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/orders?${params}`,{
           headers: { 
             'Content-Type': 'application/json'
           },
@@ -51,8 +51,8 @@ export default function OrderManagement() {
         });
         if (response.status === 401) {
           alert("Your session has expired. Please log in again.");
-          localStorage.removeItem('nexus_user_role');
-          localStorage.removeItem('nexus_expires_at');
+          localStorage.removeItem('SiloKrate_user_role');
+          localStorage.removeItem('SiloKrate_expires_at');
           window.location.href = '/login';
           return; 
         }
@@ -117,11 +117,10 @@ export default function OrderManagement() {
     }
   };
    
-  // Function to handle status updates with optimistic UI changes
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`http://localhost:3000/api/orders/${orderId}/status`, {
-        method: 'PATCH', // or PUT depending on your backend
+      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/orders/${orderId}/status`, {
+        method: 'PATCH', 
         headers: {
           'Content-Type': 'application/json',
         },
@@ -131,8 +130,8 @@ export default function OrderManagement() {
 
       if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
-        localStorage.removeItem('nexus_user_role');
-        localStorage.removeItem('nexus_expires_at');
+        localStorage.removeItem('SiloKrate_user_role');
+        localStorage.removeItem('SiloKrate_expires_at');
         window.location.href = '/login';
         return; 
       }
@@ -143,14 +142,12 @@ export default function OrderManagement() {
       }
 
       if (response.ok) {
-        // 1. Update the local state so the UI changes instantly without a refresh
         setRawOrdersData(prevData => 
           prevData.map(order => 
             order.order_id === orderId ? { ...order, order_status: newStatus } : order
           )
         );
         
-        // 2. If the modal is open, update the selected order state too
         if (selectedOrder && selectedOrder.order_id === orderId) {
           setSelectedOrder(prev => ({ ...prev, order_status: newStatus }));
         }
@@ -163,7 +160,7 @@ export default function OrderManagement() {
   };
 
 
-  // Helper function to format priority tags matching the new aesthetic
+  // Helper function to format priority tags matching 
   const getPriorityBadge = (level) => {
     switch(level) {
       case 1: return <span className="bg-rose-500/10 text-rose-500 px-2 py-1 rounded text-[10px] font-bold border border-rose-500/20 uppercase tracking-widest">Low</span>;
@@ -179,7 +176,7 @@ export default function OrderManagement() {
     if (status === 'Pending' ) {
       color = 'text-orange-500 bg-orange-500/10 border-orange-500';
     } else if (status === 'Packed') {
-      color = 'text-purple-500 bg-purple-500/10 border-purple-500'; // New Purple color for Packed!
+      color = 'text-purple-500 bg-purple-500/10 border-purple-500';
     } else if (status === 'shipped' || status === 'dispatched') {
       color = 'text-blue-500 bg-blue-500/10 border-blue-500';
     } else if (status === 'delivered') {
@@ -190,7 +187,7 @@ export default function OrderManagement() {
     return <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border border-current ${color}`}>{status}</span>;
   };
 
-  // --- DYNAMIC KPI CALCULATIONS ---
+  //DYNAMIC KPI CALCULATIONS
   const stats = useMemo(() => {
     if (!rawOrdersData || rawOrdersData.length === 0) {
       return { total: 0, pending: 0, delivered: 0, deliveredPercent: 0, revenue: "$0" };
@@ -207,7 +204,7 @@ export default function OrderManagement() {
       if (status === 'delivered') delivered++;
 
       // 2. Parse Revenue (handles strings like "$24,500" or raw numbers)
-      // Check both TotalValue and value depending on what your DB returns
+      // Check both TotalValue and value depending on what DB returns
       let val = order.TotalValue || order.value || 0; 
       if (typeof val === 'string') {
         val = Number(val.replace(/[^0-9.-]+/g, ""));
@@ -340,7 +337,7 @@ export default function OrderManagement() {
           value={statusFilterOrder}
           onChange={setStatusFilterOrder}
           options={[
-            'All Statuses', 'Pending', 'Dispatched'
+            'All Statuses', 'Pending', 'Packed', 'In Transit', 'Delivered'
           ]}
         />
         <CustomSelect 

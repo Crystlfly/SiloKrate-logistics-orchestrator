@@ -9,6 +9,7 @@ CREATE TABLE [dbo].[Orders] (
     [destination_address] NVARCHAR (255) NULL,
     [warehouse_id]        INT            NULL,
     [assigned_vehicle_id] INT            NULL,
+    [packed_at]           DATETIME       NULL,  
     PRIMARY KEY CLUSTERED ([order_id] ASC),
     CHECK ([priority_level]=(3) OR [priority_level]=(2) OR [priority_level]=(1)),
     FOREIGN KEY ([product_id]) REFERENCES [dbo].[Products] ([product_id]),

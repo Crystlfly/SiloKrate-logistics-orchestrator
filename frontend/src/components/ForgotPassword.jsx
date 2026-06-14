@@ -8,7 +8,7 @@ const ForgotPassword = () => {
 
   const handleResetSubmit = async (e) => {
     e.preventDefault();
-    const response=await fetch("http://localhost:3000/api/forgot-password",{
+    const response=await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/forgot-password`,{
       method:"POST",
       headers:{'Content-Type': 'application/json'},
       body:JSON.stringify({email})
@@ -115,14 +115,13 @@ const ForgotPassword = () => {
         </div>
 
         <p className="mt-12 text-[10px] text-zinc-700 uppercase font-black tracking-[0.3em]">
-          © 2026 Nexus Logistics • Enterprise Command Center
+          © 2026 SiloKrate Logistics • Enterprise Command Center
         </p>
       </div>
     </div>
   );
 };
 
-// Reusable Feature Item (Matches LoginSplit style)
 const FeatureItem = ({ icon, title, desc }) => (
   <div className="flex gap-5 group cursor-default">
     <div className="w-12 h-12 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center justify-center shrink-0 group-hover:border-emerald-500/50 transition-colors">

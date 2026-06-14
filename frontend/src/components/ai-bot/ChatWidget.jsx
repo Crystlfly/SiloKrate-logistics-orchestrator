@@ -14,7 +14,7 @@ const ChatWidget = () => {
     {
       id: 1,
       role: 'ai',
-      text: "Hello! I am Nexus AI. I can help you analyze inventory, track shipments, or manage user access. What do you need help with?",
+      text: "Hello! I am SiloKrate AI. I can help you analyze inventory, track shipments, or manage user access. What do you need help with?",
     }
   ]);
 
@@ -36,7 +36,7 @@ const ChatWidget = () => {
     setIsTyping(true);
 
     try {
-      const response = await fetch('http://localhost:3000/api/chat', {
+      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -66,7 +66,7 @@ const ChatWidget = () => {
       const errorMsg = {
         id: Date.now() + 1,
         role: 'ai',
-        text: "System Error: Unable to reach Nexus AI neural net. " + error.message,
+        text: "System Error: Unable to reach SiloKrate AI neural net. " + error.message,
       };
       setMessages((prev) => [...prev, errorMsg]);
     } finally {
@@ -75,19 +75,19 @@ const ChatWidget = () => {
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-[9999] flex flex-col items-end">
+    <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-[9999] flex flex-col items-end">
       
       {isOpen && (
-        <div className="mb-4 w-80 md:w-96 h-[500px] bg-[#0F1219] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 fade-in duration-300">
+        <div className="mb-3 sm:mb-4 w-[calc(100vw-2rem)] sm:w-80 md:w-96 h-[calc(100vh-6rem)] sm:h-[500px] max-h-[calc(100vh-6rem)] sm:max-h-[calc(100vh-120px)] bg-[#0F1219] border border-zinc-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col animate-in slide-in-from-bottom-5 fade-in duration-300">
           
           {/* Header */}
-          <div className="bg-[#161A22] border-b border-zinc-800 p-4 flex justify-between items-center">
+          <div className="bg-[#161A22] border-b border-zinc-800 p-3 sm:p-4 flex justify-between items-center shrink-0">
             <div className="flex items-center gap-2">
               <div className="w-8 h-8 rounded-lg bg-emerald-500/10 flex items-center justify-center">
                 <Sparkles size={16} className="text-emerald-500" />
               </div>
               <div>
-                <h3 className="text-sm font-bold text-white tracking-tight">Nexus AI</h3>
+                <h3 className="text-sm font-bold text-white tracking-tight">SiloKrate AI</h3>
                 <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest flex items-center gap-1">
                   <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span> Online
                 </p>
@@ -95,13 +95,14 @@ const ChatWidget = () => {
             </div>
             <button 
               onClick={() => setIsOpen(false)}
-              className="text-zinc-500 hover:text-white p-1 rounded-lg hover:bg-white/10 transition-colors"
+              className="text-zinc-500 hover:text-white p-2 sm:p-1 rounded-lg hover:bg-white/10 transition-colors"
+              aria-label="Close chat"
             >
               <X size={18} />
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 space-y-4 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
+          <div className="flex-1 overflow-y-auto p-3 sm:p-4 space-y-4 scrollbar-thin scrollbar-thumb-zinc-800 scrollbar-track-transparent">
             {messages.map((msg) => (
               <div key={msg.id} className={`flex gap-3 ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
                 
@@ -111,19 +112,27 @@ const ChatWidget = () => {
                   {msg.role === 'user' ? <User size={12} /> : <Bot size={12} />}
                 </div>
 
-                <div className={`max-w-[80%] rounded-xl p-3 text-sm ${
-                msg.role === 'user' 
-                    ? 'bg-zinc-800 text-white rounded-tr-sm' 
-                    : 'bg-[#161A22] border border-zinc-800 text-zinc-300 rounded-tl-sm'
+                <div className={`rounded-xl p-3 text-sm break-words overflow-x-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent ${
+                  msg.role === 'user' 
+                    ? 'max-w-[85%] sm:max-w-[80%] bg-zinc-800 text-white rounded-tr-sm' 
+                    : 'w-full max-w-[95%] sm:max-w-[95%] bg-[#161A22] border border-zinc-800 text-zinc-300 rounded-tl-sm'
                 }`}>
                 {msg.role === 'user' ? (
                     msg.text
                 ) : (
-                    <div className="prose prose-invert prose-sm max-w-none [&>p]:mb-2 [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 [&>ol]:list-decimal [&>ol]:ml-4 text-zinc-300">
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>      
+                    <div className="prose prose-invert prose-sm max-w-none text-zinc-300
+                      [&>p]:mb-2 
+                      [&>ul]:list-disc [&>ul]:ml-4 [&>ul]:mb-2 
+                      [&>ol]:list-decimal [&>ol]:ml-4 
+                      
+                      [&>table]:w-full [&>table]:mt-4 [&>table]:mb-2 [&>table]:border-collapse [&>table]:text-sm [&>table]:mr-6
+                      [&>table_th]:border [&>table_th]:border-zinc-700 [&>table_th]:bg-zinc-800/50 [&>table_th]:p-2 [&>table_th]:text-left [&>table_th]:text-zinc-200
+                      [&>table_td]:border [&>table_td]:border-zinc-800 [&>table_td]:p-2 [&>table_td]:text-zinc-300">
+                      
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>      
                           {msg.text}
-                        </ReactMarkdown>
-                    </div>
+                      </ReactMarkdown>
+                  </div>
                 )}
                 </div>
               </div>
@@ -144,13 +153,13 @@ const ChatWidget = () => {
           </div>
 
           {/* Input Area */}
-          <div className="p-3 bg-[#161A22] border-t border-zinc-800">
+          <div className="p-2 sm:p-3 bg-[#161A22] border-t border-zinc-800 shrink-0">
             <form onSubmit={handleSendMessage} className="relative flex items-center">
               <input
                 type="text"
                 value={inputMessage}
                 onChange={(e) => setInputMessage(e.target.value)}
-                placeholder="Ask Nexus AI..."
+                placeholder="Ask SiloKrate AI..."
                 className="w-full bg-[#0B0E14] border border-zinc-800 rounded-xl py-3 pl-4 pr-12 text-sm text-zinc-200 focus:outline-none focus:border-emerald-500/50 transition-colors placeholder:text-zinc-600"
               />
               <button 
@@ -169,11 +178,11 @@ const ChatWidget = () => {
       {/* Floating Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className={`w-14 h-14 flex items-center justify-center rounded-full shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 ${
+        className={`w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center rounded-full shadow-[0_0_20px_rgba(16,185,129,0.3)] transition-all duration-300 ${
           isOpen ? 'bg-zinc-800 hover:bg-zinc-700 text-white rotate-90 scale-90' : 'bg-emerald-500 hover:bg-emerald-400 text-black hover:scale-105 hover:rotate-12'
         }`}
       >
-        {isOpen ? <X size={24} className="-rotate-90" /> : <MessageSquare size={24} />}
+        {isOpen ? <X size={20} className="-rotate-90 sm:w-6 sm:h-6" /> : <MessageSquare size={20} className="sm:w-6 sm:h-6" />}
       </button>
       
     </div>

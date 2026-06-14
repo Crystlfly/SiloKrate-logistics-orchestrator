@@ -4,7 +4,6 @@ import UserModal from './UserModal';
 import csvDownloadHelper from './csvDownloadHelper'
 import CustomSelect from './CustomSelect';
 
-// FIX 4: Added missing roles to the map
 const ROLE_MAP = {
   system_admin: { label: "System Admin", color: "purple" },
   inventory_manager: { label: "Inventory Manager", color: "blue" },
@@ -22,7 +21,7 @@ const Users = () => {
   const [selectedUser, setSelectedUser] = useState(null);
 
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageInput, setPageInput] = useState(1); // FIX 2: Added missing state
+  const [pageInput, setPageInput] = useState(1);
   const [totalPages, setTotalPages] = useState(1); 
   
   const [searchQuery, setSearchQuery] = useState("");
@@ -43,7 +42,7 @@ const Users = () => {
         category: roleFilter === "All Roles" ? "" : roleFilter 
       });
 
-      const response = await fetch(`http://localhost:3000/api/users?${params}`, {
+      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/users?${params}`, {
         headers: {
           'Content-Type': 'application/json'
         },
@@ -52,8 +51,8 @@ const Users = () => {
 
       if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
-        localStorage.removeItem('nexus_user_role');
-        localStorage.removeItem('nexus_expires_at');
+        localStorage.removeItem('SiloKrate_user_role');
+        localStorage.removeItem('SiloKrate_expires_at');
         window.location.href = '/login';
         return; 
       } else if (response.status === 403) {
@@ -87,7 +86,6 @@ const Users = () => {
           opCost: extractedData.filter(u => u.Role === "warehouse_staff").length,
         });
         
-        // FIX 3: Update total pages from backend so 'Next' button works!
         const fetchedPages = data.pagination?.totalPages || 1;
         setTotalPages(fetchedPages === 0 ? 1 : fetchedPages); 
       }
@@ -112,8 +110,6 @@ const Users = () => {
   useEffect(() => {
       setCurrentPage(1);
   }, [searchQuery, roleFilter]);
-
-  // --- FIX 1: REMOVED THE ROGUE fetchInventory useEffect ---
 
   // Pagination Handlers
   const handleNextPage = () => {
@@ -163,7 +159,7 @@ const Users = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to remove this user access?")) {
       try {
-        const response = await fetch(`http://localhost:3000/api/deleteUser/${id}`, {
+        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/deleteUser/${id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -173,8 +169,8 @@ const Users = () => {
 
         if (response.status === 401) {
           alert("Your session has expired. Please log in again.");
-          localStorage.removeItem('nexus_user_role');
-          localStorage.removeItem('nexus_expires_at');
+          localStorage.removeItem('SiloKrate_user_role');
+          localStorage.removeItem('SiloKrate_expires_at');
           window.location.href = '/login';
           return; 
         } else if (response.status === 403) {
@@ -216,7 +212,7 @@ const Users = () => {
       category: roleFilter !== "All Roles" ? roleFilter : ""
     });
 
-      const response = await fetch(`http://localhost:3000/api/users?${params}`, {
+      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/users?${params}`, {
         headers: {
           'Content-Type': 'application/json'
         },
@@ -225,8 +221,8 @@ const Users = () => {
 
       if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
-        localStorage.removeItem('nexus_user_role');
-        localStorage.removeItem('nexus_expires_at');
+        localStorage.removeItem('SiloKrate_user_role');
+        localStorage.removeItem('SiloKrate_expires_at');
         window.location.href = '/login';
         return; 
       } else if (response.status === 403) {
@@ -254,7 +250,7 @@ const Users = () => {
 
   if (isLoading && currentPage === 1 && usersData.length === 0) {
     return <div className="min-h-screen bg-[#0B0E14] flex items-center justify-center text-zinc-500">
-      <Loader2 className="animate-spin mr-2" /> Loading Nexus Protocol...
+      <Loader2 className="animate-spin mr-2" /> Loading SiloKrate Protocol...
     </div>;
   }
 

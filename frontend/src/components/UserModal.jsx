@@ -33,7 +33,6 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
         setStatus('loading');
         setErrorMessage('');
 
-        // Backend expects strings for Role
         const payload = {
             fullName: formData.fullName,
             email: formData.email,
@@ -42,8 +41,8 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
 
         try {
             const endpoint = editMode 
-                ? `http://localhost:3000/api/updateUser/${initialData.UserId}` 
-                : 'http://localhost:3000/api/signup';
+                ? `http://${import.meta.env.VITE_SERVER_URL}/api/updateUser/${initialData.UserId}` 
+                : `http://${import.meta.env.VITE_SERVER_URL}/api/signup`;
             
             const method = editMode ? 'PUT' : 'POST';
             
@@ -57,8 +56,8 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
             });
             if (response.status === 401) {
                 alert("Your session has expired. Please log in again.");
-                localStorage.removeItem('nexus_user_role');
-                localStorage.removeItem('nexus_expires_at');
+                localStorage.removeItem('SiloKrate_user_role');
+                localStorage.removeItem('SiloKrate_expires_at');
                 window.location.href = '/login';
                 return; 
             }
@@ -96,7 +95,7 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
                 <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-[#161A22]">
                     <div>
                         <h2 className="text-lg font-bold text-white tracking-tight">{editMode ? "Edit Access" : "Grant Access"}</h2>
-                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Nexus Security Protocol</p>
+                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">SiloKrate Security Protocol</p>
                     </div>
                     <button 
                         disabled={status === 'loading'} 
@@ -152,7 +151,7 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
                                     value={formData.email}
                                     onChange={handleChange} 
                                     className="w-full bg-[#07090D] border border-zinc-800 rounded-lg py-2 px-3 text-sm text-zinc-200 focus:border-emerald-500/50 outline-none transition-all placeholder:text-zinc-700" 
-                                    placeholder="sarah@nexus.logistics" 
+                                    placeholder="sarah@SiloKrate.logistics" 
                                     required
                                 />
                             </div>
@@ -163,7 +162,7 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
                                 </label>
                                 
                                 <CustomSelect
-                                    // 1. Convert the backend value back to a pretty label for the UI
+                                    //Convert the backend value back to a pretty label for the UI
                                     value={
                                         formData.role === 'system_admin' ? 'System Admin' :
                                         formData.role === 'inventory_manager' ? 'Inventory Manager' :
@@ -173,7 +172,7 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
                                         formData.role === 'warehouse_staff' ? 'Warehouse Staff' :
                                         'Select Role'
                                     }
-                                    // 2. Map the selected pretty string back to the exact database string
+                                    //Map the selected pretty string back to the exact database string
                                     onChange={(selectedValue) => {
                                         const roleMap = {
                                             'System Admin': 'system_admin',
@@ -184,13 +183,11 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
                                             'Warehouse Staff': 'warehouse_staff'
                                         };
                                         
-                                        // Update formData directly since CustomSelect doesn't send an 'e.target'
                                         setFormData({ 
                                             ...formData, 
                                             role: roleMap[selectedValue] || '' 
                                         });
                                     }}
-                                    // 3. Pass simple strings exactly how CustomSelect expects them
                                     options={[
                                         'System Admin', 
                                         'Inventory Manager', 

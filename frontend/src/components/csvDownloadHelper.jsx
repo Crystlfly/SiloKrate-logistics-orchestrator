@@ -2,10 +2,10 @@ export default function csvDownloadHelper(headers, rows) {
 
   
 
-  // 3. Combine headers and rows
+  // Combine headers and rows
   const csvContent = [headers, ...rows].map(e => e.join(",")).join("\n");
 
-  // 4. Create Blob and Trigger Download
+  // Create Blob and Trigger Download
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
   const url = URL.createObjectURL(blob);
   const link = document.createElement("a");

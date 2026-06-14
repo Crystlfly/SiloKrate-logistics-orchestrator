@@ -5,9 +5,11 @@ import cors from 'cors';
 import dbconfigSetup from './dbconfigSetup.js';
 import login from './login.js';
 import signup from './signup.js';
+import firstLoginReset from './firstLoginReset.js';
 import fleet from './components/fleet.js';
 import inventory from './components/inventory.js';
 import warehouses from './components/warehouse.js';
+import activities from './components/activities.js';
 import forgotPass from './components/forgotPass.js';
 import google from './google.js';
 import order from './components/order.js';
@@ -16,13 +18,15 @@ import user from './components/user.js';
 import cookieParser from 'cookie-parser';
 import dashboardService from './components/dashboardService.js';
 import chat from './components/ai-bot/chat.js';
+import cron from 'node-cron';
+import { setVehicleIdleAndMatch } from './services/dispatchService.js';
 
 dotenv.config();
 
 const app = express();
 app.use(cors({
     origin: 'http://localhost:5173',
-    credentials: true                // This flag tells the browser "Yes, I accept cookies!"
+    credentials: true              
 }));
 app.use(express.json());
 
@@ -36,9 +40,11 @@ const config = dbconfigSetup;
 
 app.use(login);
 app.use(signup);
+app.use(firstLoginReset);
 app.use(fleet);
 app.use(inventory);
 app.use(warehouses);
+app.use(activities);
 app.use(forgotPass);
 app.use(google);
 app.use(order);
@@ -64,7 +70,16 @@ app.use(chat);
 app.get('/api/logistics/coordinates', async (req, res) => {
     try {
         let pool = await sql.connect(config);
-        let result = await pool.request().query('SELECT latitude, longitude FROM Warehouses');
+        let result = await pool.request().query(`
+            SELECT 
+                warehouse_id, 
+                location_name, 
+                total_capacity_sqft, 
+                status, 
+                latitude, 
+                longitude 
+            FROM Warehouses
+        `);
         
         res.json({
             status: 'success',
@@ -101,8 +116,33 @@ app.get('/api/logistics/coordinates', async (req, res) => {
 // });
 
 app.post('/api/auth/logout', (req, res) => {
-    res.clearCookie('nexus_token'); // Destroys the cookie
+    res.clearCookie('SiloKrate_token'); // Destroys the cookie
     res.json({ message: "Logged out successfully" });
+});
+
+cron.schedule('* * * * 3', async () => {
+    try {
+        const pool = await sql.connect(config);
+        
+        // Checkig if there is at least one 'Packed' order AND an 'Idle' vehicle
+        const checkResult = await pool.request().query(`
+            IF EXISTS (SELECT 1 FROM Orders WHERE order_status = 'Packed') 
+            BEGIN
+                SELECT TOP 1 vehicle_id as idle_vehicle_id 
+                FROM Fleet 
+                WHERE status = 'Idle'
+            END
+        `);
+
+        if (checkResult.recordset && checkResult.recordset.length > 0) {
+            const vehicleToTrigger = checkResult.recordset[0].idle_vehicle_id;
+            console.log(`[CRON SWEEP]: Found waiting orders and idle vehicles. Dispatching vehicle ${vehicleToTrigger}...`);
+            
+            await setVehicleIdleAndMatch(vehicleToTrigger);
+        }
+    } catch (err) {
+        console.error("[CRON SWEEP ERROR]:", err.message);
+    }
 });
 
 app.listen(port, () => {

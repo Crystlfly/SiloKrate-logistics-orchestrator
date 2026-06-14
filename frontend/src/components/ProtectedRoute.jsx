@@ -1,7 +1,7 @@
 import { Navigate, Outlet } from 'react-router-dom';
 
 const ProtectedRoute = ({ allowedRoles }) => {
-    const userRole = localStorage.getItem('nexus_user_role');
+    const userRole = localStorage.getItem('SiloKrate_user_role');
 
     if (!userRole) {
         return <Navigate to="/login" replace />;

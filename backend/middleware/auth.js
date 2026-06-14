@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 
 export const authenticateToken = (req, res, next) => {
-    const token = req.cookies.nexus_token;
+    const token = req.cookies.SiloKrate_token;
 
     if (!token) {
         return res.status(401).json({ message: "Access Denied: No Token Provided" });

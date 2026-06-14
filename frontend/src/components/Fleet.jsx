@@ -19,7 +19,6 @@ const Fleet = () => {
   const [totalItems, setTotalItems] = useState(0);
   const itemsPerPage = 10;
 
-  // 3. Filter State
   const [searchQuery, setSearchQuery] = useState("");
   const [typeFilter, setTypeFilter] = useState("All Types");
   const [statusFilter, setStatusFilter] = useState("All Statuses");
@@ -38,7 +37,7 @@ const Fleet = () => {
         status: statusFilter !== "All Statuses" ? statusFilter : ""
       });
 
-      const response = await fetch(`http://localhost:3000/api/fleet?${params}`,{
+      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/fleet?${params}`,{
         headers: {
           'Content-Type': 'application/json' 
         },
@@ -46,8 +45,8 @@ const Fleet = () => {
       });
       if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
-        localStorage.removeItem('nexus_user_role');
-        localStorage.removeItem('nexus_expires_at');
+        localStorage.removeItem('SiloKrate_user_role');
+        localStorage.removeItem('SiloKrate_expires_at');
         window.location.href = '/login';
         return; 
       }
@@ -133,7 +132,7 @@ const Fleet = () => {
   const handleDelete = async (id) => {
       if (window.confirm("Are you sure you want to delete this Vehicle?")) {
         try {  
-          const response = await fetch(`http://localhost:3000/api/deleteFleet/${id}`, {
+          const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/deleteFleet/${id}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json' 
@@ -142,8 +141,8 @@ const Fleet = () => {
           });
           if (response.status === 401) {
             alert("Your session has expired. Please log in again.");
-            localStorage.removeItem('nexus_user_role');
-            localStorage.removeItem('nexus_expires_at');
+            localStorage.removeItem('SiloKrate_user_role');
+            localStorage.removeItem('SiloKrate_expires_at');
             window.location.href = '/login';
             return; 
           }

@@ -17,7 +17,7 @@ const getTimeAgo = (timestamp) => {
     return Math.floor(seconds) + " secs ago";
 };
 
-// Activity Item Sub-component (moved from your main file)
+// Activity Item Sub-component (moved from the main file)
 const ActivityItem = ({ type, loc, id, qty, time, status }) => (
     <div className="relative pl-6 border-l border-zinc-800 group cursor-default">
       <div className={`absolute -left-1.5 top-0 w-3 h-3 rounded-full border-2 border-[#0B0E14] 
@@ -46,11 +46,10 @@ const ActivityFeed = () => {
     useEffect(() => {
         const fetchActivities = async () => {
             try {
-                const response = await fetch('http://localhost:3000/api/activities', {
+                const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/activities`, {
                     credentials: 'include'
                 });
                 if (response.status === 401) {
-                    // Optional: handle auth errors quietly here or let the main page handle it
                     return; 
                 }
                 else if (response.status === 403) {

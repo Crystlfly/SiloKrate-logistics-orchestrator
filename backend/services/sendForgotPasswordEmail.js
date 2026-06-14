@@ -12,8 +12,8 @@ export async function sendForgotPasswordEmail(userEmail, resetToken) {
     const htmlTemplate = `
     <div style="font-family: sans-serif; background-color: #0B0E14; padding: 40px; color: #fff;">
     <div style="max-width: 600px; margin: 0 auto; background-color: #0F1219; border: 1px solid #333; border-radius: 16px; padding: 30px;">
-        <h2 style="color: #10b981; margin-bottom: 20px;">Nexus Password Reset</h2>
-        <p style="color: #a1a1aa; font-size: 16px;">We received a request to reset the password for your Nexus account.</p>
+        <h2 style="color: #10b981; margin-bottom: 20px;">SiloKrate Password Reset</h2>
+        <p style="color: #a1a1aa; font-size: 16px;">We received a request to reset the password for your SiloKrate account.</p>
         <div style="margin: 30px 0;">
         <a href="http://localhost:5173/reset-password/${resetToken}" 
             style="background-color: #10b981; color: #000; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px;">

@@ -20,7 +20,7 @@ const SignupSplit = ({ onLoginClick, onLogin }) => {
             return;
         }
         try{
-            const res=await fetch("http://localhost:3000/api/signup",{
+            const res=await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/signup`,{
                 method:"POST",
                 headers:{
                     "Content-Type":"application/json"
@@ -47,8 +47,7 @@ const SignupSplit = ({ onLoginClick, onLogin }) => {
     const googleLogin = useGoogleLogin({
       onSuccess: async (tokenResponse) => {
         try {
-          // Send the access token to your backend
-          const res = await fetch("http://localhost:3000/api/google", {
+          const res = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/google`, {
             method: "POST",
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ token: tokenResponse.access_token })
@@ -58,7 +57,7 @@ const SignupSplit = ({ onLoginClick, onLogin }) => {
           if (data.success) {
             // Save token and login user
             onLogin(data.userRole, data.expiresAt);
-            window.location.reload(); // Quick way to refresh auth state
+            window.location.reload();
           }
         } catch (err) {
           console.error("Google Signup Error:", err);
@@ -96,7 +95,7 @@ const SignupSplit = ({ onLoginClick, onLogin }) => {
 
         {/* Testimonial */}
         <div className="bg-white/[0.02] border border-white/10 rounded-2xl p-6 max-w-md italic text-zinc-400 text-sm">
-          "Nexus transformed our logistics operations. We reduced delivery times by 40% and cut costs significantly."
+          "SiloKrate transformed our logistics operations. We reduced delivery times by 40% and cut costs significantly."
           <div className="mt-4 flex items-center gap-3 not-italic">
             <div className="w-10 h-10 rounded-full bg-zinc-800 border border-zinc-700"></div>
             <div>
@@ -186,8 +185,8 @@ const InputField = ({ label, placeholder, type = "text", value, onChange }) => (
       <input 
         type={type} 
         placeholder={placeholder} 
-        value={value} // Add this
-        onChange={onChange} // Add this
+        value={value}
+        onChange={onChange}
         className="w-full bg-zinc-900/50 border border-zinc-800 rounded-lg py-2.5 px-4 text-sm text-zinc-300 focus:outline-none focus:border-emerald-500/50" 
       />
       {type === "password" && <Eye size={14} className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-600" />}

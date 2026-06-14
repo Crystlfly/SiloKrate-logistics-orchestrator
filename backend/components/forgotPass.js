@@ -17,7 +17,7 @@ router.post("/api/forgot-password", async(req,res)=>{
         if(result.recordset.length === 0){
             return res.status(404).json({error:"User not found"});
         }
-        // Here you would generate a reset token and send the email
+
         const resetToken = crypto.randomBytes(32).toString('hex');
         const hashedToken = crypto.createHash('sha256').update(resetToken).digest('hex');
         const tokenExpiry = new Date(Date.now() + 3600000);

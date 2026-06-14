@@ -9,7 +9,7 @@ export default function OrderModal({ isOpen, onCloseAction }) {
         itemid: '',
         quantity: '',
         date: new Date().toISOString().split('T')[0],
-        priorityLvl: 'Normal', // Added back to state
+        priorityLvl: 'Normal',
         dest: '',
     });
 
@@ -21,7 +21,7 @@ export default function OrderModal({ isOpen, onCloseAction }) {
         setErrorMessage('');
 
         try {
-            const response = await fetch('http://localhost:3000/api/orders', {
+            const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/orders`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -31,8 +31,8 @@ export default function OrderModal({ isOpen, onCloseAction }) {
             });
             if (response.status === 401) {
                 alert("Your session has expired. Please log in again.");
-                localStorage.removeItem('nexus_user_role');
-                localStorage.removeItem('nexus_expires_at');
+                localStorage.removeItem('SiloKrate_user_role');
+                localStorage.removeItem('SiloKrate_expires_at');
                 window.location.href = '/login';
                 return; 
             }
@@ -52,7 +52,7 @@ export default function OrderModal({ isOpen, onCloseAction }) {
                 }, 1500);
             } else {
                 setStatus('error');
-                setErrorMessage(data.message || 'Protocol Error: Order rejected by Nexus Core.');
+                setErrorMessage(data.message || 'Protocol Error: Order rejected by SiloKrate Core.');
             }
         } catch (error) {
             setStatus('error');
@@ -72,7 +72,7 @@ export default function OrderModal({ isOpen, onCloseAction }) {
                 <div className="px-6 py-4 border-b border-zinc-800 flex justify-between items-center bg-[#161A22]">
                     <div>
                         <h2 className="text-lg font-bold text-white tracking-tight">Create New Order</h2>
-                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">Nexus Logistics Protocol</p>
+                        <p className="text-[10px] text-emerald-500 font-bold uppercase tracking-widest">SiloKrate Logistics Protocol</p>
                     </div>
                     <button 
                         disabled={status === 'loading'} 

@@ -6,9 +6,8 @@ const config = {
     server: process.env.DB_SERVER, 
     database: process.env.DB_NAME,
     options: {
-        instanceName: 'SQLEXPRESS01', // Explicitly tell Node the instance here
-        encrypt: false, // Turn off for local dev
-        trustServerCertificate: true 
+        encrypt: true, // Turn off for local dev
+        trustServerCertificate: false, // Turn off for local dev 
     }
 };
 

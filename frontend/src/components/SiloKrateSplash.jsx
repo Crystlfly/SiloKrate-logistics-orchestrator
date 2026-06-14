@@ -1,6 +1,6 @@
 import React from 'react';
 
-const NexusSplash = () => {
+const SiloKrateSplash = () => {
   return (
     <div className="min-h-screen bg-[#0B0E14] flex flex-col items-center justify-center relative overflow-hidden">
       {/* GRID PATTERN 
@@ -33,7 +33,7 @@ const NexusSplash = () => {
         {/* BRANDING */}
         <div className="text-center">
           <h2 className="text-white font-black text-3xl tracking-[0.4em] uppercase mb-2">
-            Nexus<span className="text-emerald-500">.</span>
+            SiloKrate<span className="text-emerald-500">.</span>
           </h2>
           <div className="flex items-center gap-3 justify-center">
             <div className="h-[1px] w-8 bg-zinc-800"></div>
@@ -55,4 +55,4 @@ const NexusSplash = () => {
   );
 };
 
-export default NexusSplash;
+export default SiloKrateSplash;

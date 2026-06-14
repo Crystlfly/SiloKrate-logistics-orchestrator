@@ -1,7 +1,7 @@
 import { Router } from "express";
 import sql from "mssql";
 import dbconfigSetup from "../dbconfigSetup.js";
-import { establishConnection } from '../utils/dbhelper.js'; // Ensure this is imported!
+import { establishConnection } from '../utils/dbhelper.js'; 
 import { authenticateToken, requireRole } from '../middleware/auth.js';
 
 const router = Router();
@@ -20,42 +20,34 @@ router.get("/api/logistics",
     const search = req.query.search || "";
     const status = req.query.status || "";
     const vehicle = req.query.vehicle || "";
-    let whereClause = "WHERE 1=1";
-    const createRequest = () => {
-      const req = pool.request();
-      if (search) req.input("search", sql.VarChar, `%${search}%`);
-      if (status) req.input("status", sql.VarChar, status);
-      if (vehicle) req.input("vehicle", sql.VarChar, vehicle);
-      req.input("offset", sql.Int, offset);
-      req.input("limit", sql.Int, limit);
-      return req;
-    };
+    const result = await pool.request()
+      .input("Search", sql.VarChar, search)
+      .input("Status", sql.VarChar, status)
+      .input("Vehicle", sql.VarChar, vehicle)
+      .input("Offset", sql.Int, offset)
+      .input("Limit", sql.Int, limit)
+      .execute("GetLogistics");
 
-    if (search) {
-      whereClause += " AND (CAST(order_id AS VARCHAR(255)) LIKE @search OR origin LIKE @search OR destination LIKE @search OR carrier LIKE @search)";
-    }
-    if (status) {
-      whereClause += " AND order_status = @status";
-    }
-    if (vehicle) {
-      whereClause += " AND vehicle_type = @vehicle";
-    }
+    const shipments = result.recordset;
 
-    const result = await createRequest().query(`SELECT * FROM ActiveShipments ${whereClause} ORDER BY order_id OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY`);
-    const countQuery = await createRequest().query(`SELECT COUNT(*) as total FROM ActiveShipments ${whereClause}`);
-    
-    const totalItems = countQuery.recordset[0].total;
+    const totalItems =
+      shipments.length > 0
+        ? shipments[0].totalItems
+        : 0;
+
     const totalPages = Math.ceil(totalItems / limit);
-    
-    res.status(200).json({ 
-        status: 200, 
-        data: result.recordset, 
-        pagination: {
-            currentPage: page,
-            totalPages: totalPages,
-            totalItems: totalItems,
-            itemsPerPage: limit
-        }
+
+    const data = shipments.map(({ totalItems, ...shipment }) => shipment);
+
+    res.status(200).json({
+      status: 200,
+      data,
+      pagination: {
+        currentPage: page,
+        totalPages,
+        totalItems,
+        itemsPerPage: limit
+      }
     });
 
   } catch (err) {

@@ -5,7 +5,7 @@ import csvDownloadHelper from './csvDownloadHelper'
 import CustomSelect from './CustomSelect'; 
 
 const Inventory = () => {
-  const userRole = (localStorage.getItem('nexus_user_role'));
+  const userRole = (localStorage.getItem('SiloKrate_user_role'));
   const [inventoryData, setInventoryData] = useState([]);
   const [stats, setStats] = useState({ total: 0, low: 0, over: 0, out: 0 }); 
   const [isLoading, setIsLoading] = useState(true);
@@ -28,7 +28,6 @@ const Inventory = () => {
 
   const fetchInventory = async () => {
     try {
-      // Create Query String with Page + Filters
       const params = new URLSearchParams({
         page: currentPage,
         limit: itemsPerPage,
@@ -37,7 +36,7 @@ const Inventory = () => {
         status: statusFilter !== "All Statuses" ? statusFilter : ""
       });
 
-      const response = await fetch(`http://localhost:3000/api/inventory?${params}`,{
+      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/inventory?${params}`,{
         headers: {
           'Content-Type': 'application/json' 
         },
@@ -46,8 +45,8 @@ const Inventory = () => {
       const data = await response.json();
       if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
-        localStorage.removeItem('nexus_user_role');
-        localStorage.removeItem('nexus_expires_at');
+        localStorage.removeItem('SiloKrate_user_role');
+        localStorage.removeItem('SiloKrate_expires_at');
         window.location.href = '/login';
         return; 
       }
@@ -124,7 +123,7 @@ const Inventory = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this SKU?")) {
       try {
-        const response = await fetch(`http://localhost:3000/api/deleteProduct/${id}`, {
+        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/deleteProduct/${id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -133,8 +132,8 @@ const Inventory = () => {
         });
         if (response.status === 401) {
           alert("Your session has expired. Please log in again.");
-          localStorage.removeItem('nexus_user_role');
-          localStorage.removeItem('nexus_expires_at');
+          localStorage.removeItem('SiloKrate_user_role');
+          localStorage.removeItem('SiloKrate_expires_at');
           window.location.href = '/login';
           return; 
         }
@@ -179,7 +178,7 @@ const Inventory = () => {
       status: statusFilter !== "All Statuses" ? statusFilter : ""
     });
 
-      const response = await fetch(`http://localhost:3000/api/inventory?${params}`,{
+      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/inventory?${params}`,{
         headers: {
           'Content-Type': 'application/json'
         },
@@ -188,8 +187,8 @@ const Inventory = () => {
       const result=await response.json();
       if (response.status === 401) {
         alert("Your session has expired. Please log in again.");
-        localStorage.removeItem('nexus_user_role');
-        localStorage.removeItem('nexus_expires_at');
+        localStorage.removeItem('SiloKrate_user_role');
+        localStorage.removeItem('SiloKrate_expires_at');
         window.location.href = '/login';
         return; 
       }
@@ -373,7 +372,7 @@ const InvStatCard = ({ icon, label, value, trend, color }) => (
 );
 
 const InventoryRow = ({ item, isOpen, onToggle, onDelete, onUpdate }) => {
-  const userRole = (localStorage.getItem('nexus_user_role'));
+  const userRole = (localStorage.getItem('SiloKrate_user_role'));
   const { product_id, sku, name, category, current_stock, reorder_level, status, unit_price, warehouse_id, zone_id } = item;
 
   const val = `$${(unit_price || 0).toLocaleString()}`;
