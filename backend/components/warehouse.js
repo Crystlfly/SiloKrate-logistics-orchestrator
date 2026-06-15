@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import sql from 'mssql';
-import { establishConnection } from '../utils/dbhelper.js'; // Ensure correct path
+import { establishConnection } from '../utils/dbHelper.js'; // Ensure correct path
 import dbconfigSetup from '../dbconfigSetup.js';
 import { addWarehouse, updateWarehouse, deleteWarehouse } from '../services/warehouseService.js';
 import { authenticateToken, requireRole } from '../middleware/auth.js';

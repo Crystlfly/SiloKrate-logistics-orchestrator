@@ -2,7 +2,7 @@ import { Router } from "express";
 import { authenticateToken } from "../../middleware/auth.js"; 
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import sql from 'mssql';
-import { establishConnection } from '../../utils/dbhelper.js'; 
+import { establishConnection } from '../../utils/dbHelper.js'; 
 import dbconfigSetup from '../../dbconfigSetup.js';
 
 const router = Router();

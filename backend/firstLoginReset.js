@@ -2,7 +2,7 @@ import { Router } from "express";
 import bcrypt from 'bcryptjs'; 
 import sql from 'mssql';
 import dbconfigSetup from './dbconfigSetup.js';
-import { establishConnection } from './utils/dbhelper.js';
+import { establishConnection } from './utils/dbHelper.js';
 
 const config = dbconfigSetup;
 const router = Router();
