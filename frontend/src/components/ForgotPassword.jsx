@@ -8,7 +8,7 @@ const ForgotPassword = () => {
 
   const handleResetSubmit = async (e) => {
     e.preventDefault();
-    const response=await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/forgot-password`,{
+    const response=await fetch(`${import.meta.env.VITE_SERVER_URL}/api/forgot-password`,{
       method:"POST",
       headers:{'Content-Type': 'application/json'},
       body:JSON.stringify({email})

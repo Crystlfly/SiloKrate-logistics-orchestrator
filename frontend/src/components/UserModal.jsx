@@ -41,8 +41,8 @@ export default function UserModal({ isOpen, onCloseAction, initialData = null })
 
         try {
             const endpoint = editMode 
-                ? `http://${import.meta.env.VITE_SERVER_URL}/api/updateUser/${initialData.UserId}` 
-                : `http://${import.meta.env.VITE_SERVER_URL}/api/signup`;
+                ? `${import.meta.env.VITE_SERVER_URL}/api/updateUser/${initialData.UserId}` 
+                : `${import.meta.env.VITE_SERVER_URL}/api/signup`;
             
             const method = editMode ? 'PUT' : 'POST';
             

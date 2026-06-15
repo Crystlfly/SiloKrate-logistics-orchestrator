@@ -37,7 +37,7 @@ const Fleet = () => {
         status: statusFilter !== "All Statuses" ? statusFilter : ""
       });
 
-      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/fleet?${params}`,{
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/fleet?${params}`,{
         headers: {
           'Content-Type': 'application/json' 
         },
@@ -132,7 +132,7 @@ const Fleet = () => {
   const handleDelete = async (id) => {
       if (window.confirm("Are you sure you want to delete this Vehicle?")) {
         try {  
-          const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/deleteFleet/${id}`, {
+          const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/deleteFleet/${id}`, {
             method: 'DELETE',
             headers: {
               'Content-Type': 'application/json' 

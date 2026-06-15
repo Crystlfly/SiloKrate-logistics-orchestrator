@@ -36,7 +36,7 @@ const Inventory = () => {
         status: statusFilter !== "All Statuses" ? statusFilter : ""
       });
 
-      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/inventory?${params}`,{
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/inventory?${params}`,{
         headers: {
           'Content-Type': 'application/json' 
         },
@@ -123,7 +123,7 @@ const Inventory = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to delete this SKU?")) {
       try {
-        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/deleteProduct/${id}`, {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/deleteProduct/${id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -178,7 +178,7 @@ const Inventory = () => {
       status: statusFilter !== "All Statuses" ? statusFilter : ""
     });
 
-      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/inventory?${params}`,{
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/inventory?${params}`,{
         headers: {
           'Content-Type': 'application/json'
         },

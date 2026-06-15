@@ -36,7 +36,7 @@ const ChatWidget = () => {
     setIsTyping(true);
 
     try {
-      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/chat`, {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

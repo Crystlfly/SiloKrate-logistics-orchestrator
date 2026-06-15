@@ -38,7 +38,7 @@ const SetupPassword = () => {
         setIsLoading(true);
 
         try {
-            const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/auth/first-login-reset`, {
+            const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/auth/first-login-reset`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ userId, newPassword })

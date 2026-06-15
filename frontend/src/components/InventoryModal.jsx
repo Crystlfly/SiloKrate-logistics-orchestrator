@@ -71,7 +71,7 @@ export default function InventoryModal({isOpen, onCloseAction, initialToBeUpdate
         };
 
         try{
-            const endpoint = editMode ? `http://${import.meta.env.VITE_SERVER_URL}/api/updateProduct/${initialToBeUpdatedData.product_id}` : `http://${import.meta.env.VITE_SERVER_URL}/api/addProduct`;
+            const endpoint = editMode ? `${import.meta.env.VITE_SERVER_URL}/api/updateProduct/${initialToBeUpdatedData.product_id}` : `${import.meta.env.VITE_SERVER_URL}/api/addProduct`;
             const method = editMode ? 'PUT' : 'POST';
             const response = await fetch(endpoint, {
                 method: method,

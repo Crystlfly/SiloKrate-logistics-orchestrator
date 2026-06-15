@@ -49,7 +49,7 @@ function App() {
   };
 
   const handleLogout = async () => {
-    await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/auth/logout`, { 
+    await fetch(`${import.meta.env.VITE_SERVER_URL}/api/auth/logout`, { 
         method: 'POST',
         headers: {
           'Content-Type': 'application/json' 
@@ -70,7 +70,7 @@ function App() {
   }, [location.pathname, isLoggedIn]);
 
   useEffect(() => {
-    fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/logistics/coordinates`, {
+    fetch(`${import.meta.env.VITE_SERVER_URL}/api/logistics/coordinates`, {
       credentials: 'include'
     })
       .then((res) => res.json())
@@ -146,7 +146,7 @@ const MainDashboardView = ({ setIsOpen, WAREHOUSE_POINTS }) => {
   });
 
   useEffect(() => {
-    fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/dashboard-stats`, {
+    fetch(`${import.meta.env.VITE_SERVER_URL}/api/dashboard-stats`, {
       credentials: 'include'
     })
       .then((res) => res.json())

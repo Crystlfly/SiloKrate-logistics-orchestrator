@@ -65,7 +65,7 @@ export default function WarehouseModal({ isOpen, onCloseAction, initialToBeUpdat
                 status: formData.status
             };
 
-            const endpoint = editMode ? `http://${import.meta.env.VITE_SERVER_URL}/api/updateWarehouse/${initialToBeUpdatedData.warehouse_id}` : `http://${import.meta.env.VITE_SERVER_URL}/api/addWarehouse`;
+            const endpoint = editMode ? `${import.meta.env.VITE_SERVER_URL}/api/updateWarehouse/${initialToBeUpdatedData.warehouse_id}` : `${import.meta.env.VITE_SERVER_URL}/api/addWarehouse`;
             const method = editMode ? 'PUT' : 'POST';
             const response = await fetch(endpoint, {
                 method: method,

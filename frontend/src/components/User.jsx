@@ -42,7 +42,7 @@ const Users = () => {
         category: roleFilter === "All Roles" ? "" : roleFilter 
       });
 
-      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/users?${params}`, {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/users?${params}`, {
         headers: {
           'Content-Type': 'application/json'
         },
@@ -159,7 +159,7 @@ const Users = () => {
   const handleDelete = async (id) => {
     if (window.confirm("Are you sure you want to remove this user access?")) {
       try {
-        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/deleteUser/${id}`, {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/deleteUser/${id}`, {
           method: 'DELETE',
           headers: {
             'Content-Type': 'application/json'
@@ -212,7 +212,7 @@ const Users = () => {
       category: roleFilter !== "All Roles" ? roleFilter : ""
     });
 
-      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/users?${params}`, {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/users?${params}`, {
         headers: {
           'Content-Type': 'application/json'
         },

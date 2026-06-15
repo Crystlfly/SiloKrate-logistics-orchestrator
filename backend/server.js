@@ -25,7 +25,10 @@ dotenv.config();
 
 const app = express();
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: [
+        'http://localhost:5173',       
+        process.env.FRONTEND_URL  
+    ],
     credentials: true              
 }));
 app.use(express.json());
@@ -146,5 +149,5 @@ cron.schedule('* * * * 3', async () => {
 });
 
 app.listen(port, () => {
-    console.log(`Logistics API (ESM) running at http://localhost:${port}`);
+    console.log(`Logistics API (ESM) running at localhost:${port}`);
 });

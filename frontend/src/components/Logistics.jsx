@@ -35,7 +35,7 @@ const Logistics = () => {
           vehicle: vehicleFilterLogistic
         });
         
-        const response=await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/logistics?${params}`,{
+        const response=await fetch(`${import.meta.env.VITE_SERVER_URL}/api/logistics?${params}`,{
           headers: {
             'Content-Type': 'application/json' 
           },

@@ -15,7 +15,7 @@ export async function sendForgotPasswordEmail(userEmail, resetToken) {
         <h2 style="color: #10b981; margin-bottom: 20px;">SiloKrate Password Reset</h2>
         <p style="color: #a1a1aa; font-size: 16px;">We received a request to reset the password for your SiloKrate account.</p>
         <div style="margin: 30px 0;">
-        <a href="http://localhost:5173/reset-password/${resetToken}" 
+        <a href="localhost:5173/reset-password/${resetToken}" 
             style="background-color: #10b981; color: #000; padding: 12px 24px; text-decoration: none; font-weight: bold; border-radius: 8px;">
             Reset Password
         </a>

@@ -21,7 +21,7 @@ const ResetPasswordPage = () => {
 
     setStatus('loading');
     try {
-      const res = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/reset-password`, {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/reset-password`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ token, newPassword: formData.password })

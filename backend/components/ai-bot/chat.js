@@ -84,7 +84,7 @@ const apiFunctions = {
             }
 
             const query = args.queryString || '';
-            const url = `http://${process.env.SERVER_URL}/api/${args.endpoint}${query}`;
+            const url = `${process.env.SERVER_URL}/api/${args.endpoint}${query}`;
             
             console.log(`[SiloKrate AI] Fetching internal API: ${url}`);
 

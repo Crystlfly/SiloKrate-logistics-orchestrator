@@ -43,7 +43,7 @@ export default function OrderManagement() {
           priority: priorityFilterOrder === "All Priorities"?"" : priorityFilterOrder=== "Low" ? 1 : priorityFilterOrder === "Normal" ? 2 : 3
         });
 
-        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/orders?${params}`,{
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/orders?${params}`,{
           headers: { 
             'Content-Type': 'application/json'
           },
@@ -119,7 +119,7 @@ export default function OrderManagement() {
    
   const handleStatusUpdate = async (orderId, newStatus) => {
     try {
-      const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/orders/${orderId}/status`, {
+      const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/orders/${orderId}/status`, {
         method: 'PATCH', 
         headers: {
           'Content-Type': 'application/json',

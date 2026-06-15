@@ -67,7 +67,7 @@ export default function FleetModal({isOpen, onCloseAction, initialToBeUpdatedDat
         };
 
         try {
-            const endpoint = editMode ? `http://${import.meta.env.VITE_SERVER_URL}/api/updateFleet/${initialToBeUpdatedData.vehicle_id}` : `http://${import.meta.env.VITE_SERVER_URL}/api/addFleet`;
+            const endpoint = editMode ? `${import.meta.env.VITE_SERVER_URL}/api/updateFleet/${initialToBeUpdatedData.vehicle_id}` : `${import.meta.env.VITE_SERVER_URL}/api/addFleet`;
             const method = editMode ? 'PUT' : 'POST';
             const response = await fetch(endpoint, {
                 method: method,

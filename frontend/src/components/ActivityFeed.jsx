@@ -46,7 +46,7 @@ const ActivityFeed = () => {
     useEffect(() => {
         const fetchActivities = async () => {
             try {
-                const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/activities`, {
+                const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/activities`, {
                     credentials: 'include'
                 });
                 if (response.status === 401) {

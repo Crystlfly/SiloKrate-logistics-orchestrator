@@ -36,7 +36,7 @@ const WarehouseManagement = () => {
           type: typeFilterWarehouse !== "All Types" ? typeFilterWarehouse : ""
         });
 
-        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/warehouses?${params}`,{
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/warehouses?${params}`,{
           headers: {
             'Content-Type': 'application/json'
           },
@@ -143,7 +143,7 @@ const WarehouseManagement = () => {
     if (window.confirm("Are you sure?")) {
       try {
         const numericId = id.replace('WH-', '');
-        const response = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/deleteWarehouse/${numericId}`, {
+        const response = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/deleteWarehouse/${numericId}`, {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

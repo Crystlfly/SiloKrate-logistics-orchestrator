@@ -16,7 +16,7 @@ const LoginSplit = ({ onLogin, onSignupClick }) => {
 
   const executeLogin = async (loginEmail, loginPassword) => {
     try {
-      const res = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/login`, {
+      const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/login`, {
         method: "POST",
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
@@ -56,7 +56,7 @@ const LoginSplit = ({ onLogin, onSignupClick }) => {
   const googleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
-        const res = await fetch(`http://${import.meta.env.VITE_SERVER_URL}/api/google`, {
+        const res = await fetch(`${import.meta.env.VITE_SERVER_URL}/api/google`, {
           method: "POST",
           headers: { 'Content-Type': 'application/json' },
           credentials: 'include',

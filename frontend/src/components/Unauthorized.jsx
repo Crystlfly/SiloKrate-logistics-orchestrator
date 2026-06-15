@@ -29,7 +29,7 @@ const Unauthorized = () => {
           <div className="relative w-20 h-20 border border-rose-500/30 rounded-full flex items-center justify-center bg-[#0B0E14] shadow-[0_0_30px_rgba(244,63,94,0.15)]">
             {/* Lock SVG Icon */}
             <svg 
-              xmlns="http://www.w3.org/2000/svg" 
+              xmlns="www.w3.org/2000/svg" 
               width="28" 
               height="28" 
               viewBox="0 0 24 24" 
