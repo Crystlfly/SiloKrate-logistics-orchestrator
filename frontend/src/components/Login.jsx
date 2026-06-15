@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Globe, LineChart, ShieldCheck, ArrowRight, Eye, Lock } from 'lucide-react';
-import ForgotPassword from './forgotPassword.jsx';
+import ForgotPassword from './ForgotPassword.jsx';
 import { useGoogleLogin } from '@react-oauth/google';
 
 const LoginSplit = ({ onLogin, onSignupClick }) => {
