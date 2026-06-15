@@ -119,7 +119,12 @@ app.get('/api/logistics/coordinates', async (req, res) => {
 // });
 
 app.post('/api/auth/logout', (req, res) => {
-    res.clearCookie('SiloKrate_token'); // Destroys the cookie
+    res.clearCookie('SiloKrate_token', {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax'
+    });
+    
     res.json({ message: "Logged out successfully" });
 });
 
