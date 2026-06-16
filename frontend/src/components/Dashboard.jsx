@@ -79,7 +79,7 @@ const Dashboard = ({ children, onLogout}) => {
 
           </div>
           
-          <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto pb-4">
+          <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto scrollbar-thin scrollbar-thumb-zinc-700 scrollbar-track-transparent max-h-[300px] pb-4">
             <SideItem to="/" icon={<LayoutDashboard size={18}/>} label="Dashboard" end />
             <SideItem to="/orders" icon={<Package size={18}/>} label="Orders" />
             <SideItem to="/logistics" icon={<Package size={18}/>} label="Logistics" />
